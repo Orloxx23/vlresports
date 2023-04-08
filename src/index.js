@@ -1,5 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
+var cors = require('cors')
 
 const app = express();
 
@@ -7,6 +8,7 @@ const app = express();
 app.set("port", process.env.PORT || 5000);
 
 // Middlewares
+app.use(cors())
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
