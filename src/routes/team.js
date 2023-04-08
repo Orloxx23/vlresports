@@ -64,6 +64,7 @@ async function getTeam(id) {
         user: $(el).find(".team-roster-item-name-alias").text().trim(),
         name: $(el).find(".team-roster-item-name-real").text().trim(),
         tag: $(el).find(".wf-tag").text().trim(),
+        img: $(el).find(".team-roster-item-img").find("img").attr("src"),
         country: $(el)
           .find(".team-roster-item-name-alias")
           .find("i")
@@ -77,6 +78,7 @@ async function getTeam(id) {
         url: $(el).find("a").attr("href"),
         user: $(el).find(".team-roster-item-name-alias").text().trim(),
         name: $(el).find(".team-roster-item-name-real").text().trim(),
+        img: $(el).find(".team-roster-item-img").find("img").attr("src"),
         country: $(el)
           .find(".team-roster-item-name-alias")
           .find("i")
