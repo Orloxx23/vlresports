@@ -179,7 +179,7 @@ async function getTeam(id) {
     });
 
   // Extract past matches information
-  $matches(".mod-win")
+  $matches(".m-item-result")
     .not(".m-item-games-result")
     .parent()
     .map((i, el) => {
@@ -203,7 +203,8 @@ async function getTeam(id) {
           .find(".m-item-team-tag")
           .text()
           .trim(),
-        logo: $(el).find(".m-item-logo img").first().attr("src"),
+        logo: "https:"+$(el).find(".m-item-logo img").first().attr("src"),
+        points: $(el).find(".m-item-result").find("span").first().text().trim()
       };
       const team2 = {
         name: $(el)
@@ -218,7 +219,8 @@ async function getTeam(id) {
           .find(".m-item-team-tag")
           .text()
           .trim(),
-        logo: $(el).find(".m-item-logo img").last().attr("src"),
+        logo: "https:"+$(el).find(".m-item-logo img").last().attr("src"),
+        points: $(el).find(".m-item-result").find("span").last().text().trim()
       };
       const match = {
         event: {
