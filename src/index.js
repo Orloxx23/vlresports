@@ -1,6 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
-var cors = require('cors')
+let cors = require('cors')
 
 const app = express();
 
@@ -14,8 +14,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Routes
-app.use(require("./routes/index"));
-app.use("/api/team", require("./routes/team"));
+app.use(require("./versions/v1/routes/index"));
+app.use("/api", require("./versions/v1/routes/index"));
+// - Version 1
+app.use("/api/v1/teams", require("./versions/v1/routes/teams"));
 
 // Starting server
 app.listen(app.get("port"), () => {
