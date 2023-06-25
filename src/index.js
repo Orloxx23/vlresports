@@ -18,6 +18,7 @@ app.use(require("./versions/v1/routes/index"));
 app.use("/api", require("./versions/v1/routes/index"));
 // - Version 1
 app.use("/api/v1/teams", require("./versions/v1/routes/teams"));
+app.use("/api/v1/players", require("./versions/v1/routes/players"));
 
 // Starting server
 app.listen(app.get("port"), () => {

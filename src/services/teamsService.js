@@ -1,5 +1,6 @@
 const request = require("request-promise");
 const cheerio = require("cheerio");
+const { vlrgg_url } = require("../constants");
 
 /**
  * Retrieves team information from the VLR website.
@@ -80,7 +81,7 @@ async function getTeam(id) {
     if ($(el).has(".wf-tag").text()) {
       // Staff member
       const staffMember = {
-        url: "https://www.vlr.gg" + $(el).find("a").attr("href"),
+        url: vlrgg_url + $(el).find("a").attr("href"),
         user: $(el).find(".team-roster-item-name-alias").text().trim(),
         name: $(el).find(".team-roster-item-name-real").text().trim(),
         tag: $(el).find(".wf-tag").text().trim(),
@@ -91,7 +92,7 @@ async function getTeam(id) {
           .includes("owcdn")
           ? "https:" +
             $(el).find(".team-roster-item-img").find("img").attr("src")
-          : "https://www.vlr.gg" +
+          : vlrgg_url +
             $(el).find(".team-roster-item-img").find("img").attr("src"),
         country: $(el)
           .find(".team-roster-item-name-alias")
@@ -104,7 +105,7 @@ async function getTeam(id) {
     } else {
       // Player
       const player = {
-        url: "https://www.vlr.gg" + $(el).find("a").attr("href"),
+        url: vlrgg_url + $(el).find("a").attr("href"),
         user: $(el).find(".team-roster-item-name-alias").text().trim(),
         name: $(el).find(".team-roster-item-name-real").text().trim(),
         img: $(el)
@@ -114,7 +115,7 @@ async function getTeam(id) {
           .includes("owcdn")
           ? "https:" +
             $(el).find(".team-roster-item-img").find("img").attr("src")
-          : "https://www.vlr.gg" +
+          : vlrgg_url +
             $(el).find(".team-roster-item-img").find("img").attr("src"),
         country: $(el)
           .find(".team-roster-item-name-alias")

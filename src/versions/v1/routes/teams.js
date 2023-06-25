@@ -1,6 +1,6 @@
 const { Router } = require("express");
-const teamsController = require("../../../controllers/teamsController");
 const router = Router();
+const teamsController = require("../../../controllers/teamsController");
 
 // Endpoint to retrieve team information
 router.get("/:id", teamsController.getTeam);
