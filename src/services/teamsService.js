@@ -30,9 +30,16 @@ async function getTeam(id) {
   const info = {
     name: $(".team-header").find(".team-header-name h1").text().trim(),
     tag: $(".team-header").find(".team-header-name h2").text().trim(),
-    logo:
-      "https:" + $(".team-header").find(".team-header-logo img").attr("src"),
+    logo: $(".team-header")
+      .find(".team-header-logo img")
+      .attr("src")
+      .includes("/img/vlr")
+      ? vlrgg_url +
+        $(".team-header").find(".team-header-logo img").attr("src")
+      : "https:" + $(".team-header").find(".team-header-logo img").attr("src"),
   };
+
+  console.log(info.logo);
 
   // Extract roster information
   $(".wf-card")
@@ -204,8 +211,8 @@ async function getTeam(id) {
           .find(".m-item-team-tag")
           .text()
           .trim(),
-        logo: "https:"+$(el).find(".m-item-logo img").first().attr("src"),
-        points: $(el).find(".m-item-result").find("span").first().text().trim()
+        logo: "https:" + $(el).find(".m-item-logo img").first().attr("src"),
+        points: $(el).find(".m-item-result").find("span").first().text().trim(),
       };
       const team2 = {
         name: $(el)
@@ -220,8 +227,8 @@ async function getTeam(id) {
           .find(".m-item-team-tag")
           .text()
           .trim(),
-        logo: "https:"+$(el).find(".m-item-logo img").last().attr("src"),
-        points: $(el).find(".m-item-result").find("span").last().text().trim()
+        logo: "https:" + $(el).find(".m-item-logo img").last().attr("src"),
+        points: $(el).find(".m-item-result").find("span").last().text().trim(),
       };
       const match = {
         event: {
