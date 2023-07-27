@@ -132,10 +132,10 @@ async function getPlayerById(id) {
     twitch_url,
   };
 
-  const teamId = $(".wf-module-item").attr("href").split("/")[2];
+  const teamId = $(".wf-module-item").attr("href")?.split("/")[2];
   const teamUrl = vlrgg_url + $(".wf-module-item").attr("href");
   const tempTeamLogo = $(".wf-module-item").first().find("img").attr("src");
-  const teamLogo = tempTeamLogo.includes("owcdn")
+  const teamLogo = tempTeamLogo?.includes("owcdn")
     ? "https:" + tempTeamLogo
     : vlrgg_url + tempTeamLogo;
   const teamName = $(".wf-module-item")

@@ -1,4 +1,5 @@
 const playersService = require("../services/playersService");
+const catchError = require("../utils/catchError");
 
 const getPlayers = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -48,10 +49,7 @@ const getPlayers = async (req, res) => {
       data: players,
     });
   } catch (error) {
-    res.json({
-      status: "error",
-      message: error,
-    });
+    catchError(res, error);
   }
 };
 
@@ -65,10 +63,7 @@ const getPlayerById = async (req, res) => {
       data: player,
     });
   } catch (error) {
-    res.json({
-      status: "error",
-      message: error,
-    });
+    catchError(res, error);
   }
 };
 
