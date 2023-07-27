@@ -54,7 +54,6 @@ const getPlayers = async (req, res) => {
 };
 
 const getPlayerById = async (req, res) => {
-  // To do - Implement this function
   const { id } = req.params;
   try {
     const player = await playersService.getPlayerById(id);

@@ -3,11 +3,109 @@ const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 
 /**
+ * Fetches teams' information from the given region with pagination.
+ * @param {object} pagination - Pagination configuration.
+ * @param {string} pagination.limit - The number of items per page or "all".
+ * @param {number} pagination.page - The current page number.
+ * @param {string} region - The region from which to fetch the teams' information.
+ * @returns {object} An object containing teams' information and pagination details.
+ */
+async function getTeams(pagination, region) {
+  // Calculate the start and end indices based on pagination
+  const startIndex =
+    pagination.limit !== "all" ? (pagination.page - 1) * pagination.limit : 0;
+  const endIndex =
+    pagination.limit !== "all" ? pagination.page * pagination.limit : undefined;
+
+  // Send a request to get the HTML content of the rankings page for the specified region
+  const $ = await request({
+    uri: `${vlrgg_url}/rankings/${region}`,
+    transform: (body) => cheerio.load(body),
+  });
+
+  const teams = [];
+
+  if (region === "all") {
+    // For the "all" region, parse the teams' data from the table rows
+    $("tr")
+      .has("td")
+      .slice(startIndex, endIndex !== undefined ? endIndex : undefined)
+      .map((i, el) => {
+        // Extract team information from the table row
+        const name = $(el).find("td").first().next().attr("data-sort-value");
+        const id = $(el).find("td").first().next().find("a").attr("href").split("/")[2];
+        const url = vlrgg_url + $(el).find("td").first().next().find("a").attr("href");
+        const img = $(el).find("td").first().next().find("img").attr("src").includes("/img/vlr")
+          ? vlrgg_url + $(el).find("td").first().next().find("img").attr("src")
+          : "https:" + $(el).find("td").first().next().find("img").attr("src");
+        const country = $(el).find(".rank-item-team-country").text().trim();
+
+        const team = {
+          id,
+          url,
+          name,
+          img,
+          country,
+        };
+
+        teams.push(team);
+      });
+  } else {
+    // For other specific regions, parse the teams' data from a different section of the page
+    $(".mod-scroll")
+      .find(".fa-certificate")
+      .parent()
+      .parent()
+      .slice(startIndex, endIndex !== undefined ? endIndex : undefined)
+      .map((i, el) => {
+        // Extract team information from the corresponding section
+        const name = $(el).find("a").first().attr("data-sort-value");
+        const id = $(el).find("a").first().attr("href").split("/")[2];
+        const url = vlrgg_url + $(el).find("a").first().attr("href");
+        const img = $(el).find("a").first().find("img").attr("src").includes("/img/vlr")
+          ? vlrgg_url + $(el).find("a").first().find("img").attr("src")
+          : "https:" + $(el).find("a").first().find("img").attr("src");
+        const country = $(el).find(".rank-item-team-country").text().trim();
+
+        const team = {
+          id,
+          url,
+          name,
+          img,
+          country,
+        };
+
+        teams.push(team);
+      });
+  }
+
+  // Get the total number of pages
+  const totalElements = region === "all"
+    ? $("tr").has("td").length
+    : $(".mod-scroll").find(".fa-certificate").parent().parent().length;
+  const totalPages = Math.ceil(totalElements / pagination.limit);
+
+  // Check if there is a next page
+  const hasNextPage = pagination.page < totalPages;
+
+  return {
+    teams,
+    pagination: {
+      page: pagination.page,
+      limit: pagination.limit,
+      totalElements,
+      totalPages,
+      hasNextPage,
+    },
+  };
+}
+
+/**
  * Retrieves team information from the VLR website.
  * @param {string} id - Team ID.
  * @returns {Object} - Team information.
  */
-async function getTeam(id) {
+async function getTeamById(id) {
   const $ = await request({
     uri: `https://www.vlr.gg/team/${id}`,
     transform: (body) => cheerio.load(body),
@@ -281,5 +379,6 @@ async function getTeam(id) {
 }
 
 module.exports = {
-  getTeam,
+  getTeams,
+  getTeamById,
 };

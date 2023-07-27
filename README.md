@@ -1,4 +1,10 @@
-To do list v1.0.1
+To do list v1.0.2
+- [x] Get all teams
+    - [x] Teams info
+    - [x] Size
+    - [x] Pagination
+    <br />
+
 - [x] Get team info
     - [x] Team info
     - [x] Players

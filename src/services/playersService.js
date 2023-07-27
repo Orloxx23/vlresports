@@ -5,6 +5,8 @@ const { vlrgg_url } = require("../constants");
 /**
  * Retrieves player information from the VLR website based on pagination and filters.
  * @param {Object} pagination - Pagination settings.
+ * @param {string} pagination.limit - The number of items per page or "all".
+ * @param {number} pagination.page - The current page number.
  * @param {Object} filters - Filters to apply to the request.
  * @returns {Object} - Player information and pagination details.
  */
@@ -39,8 +41,7 @@ async function getPlayers(pagination, filters) {
         .text()
         .trim();
       const id = $(el).find("td").find("a").attr("href").split("/")[2];
-      const url =
-        vlrgg_url + $(el).find("td").find("a").attr("href");
+      const url = vlrgg_url + $(el).find("td").find("a").attr("href");
       const country = $(el)
         .find("td")
         .find(".flag")
@@ -78,13 +79,19 @@ async function getPlayers(pagination, filters) {
   };
 }
 
+/**
+ * Fetches player information by player ID using web scraping.
+ * @param {string} id - The player's unique ID.
+ * @returns {object} An object containing player info, team info, and socials.
+ */
 async function getPlayerById(id) {
-  // To do - implement getPlayer
+  // Send a request to get the HTML content of the player's profile page
   const $ = await request({
-    uri: `https://www.vlr.gg/player/${id}`,
+    uri: `${vlrgg_url}/player/${id}`,
     transform: (body) => cheerio.load(body),
   });
 
+  // Extract player information
   const tempImg = $(".player-header")
     .find(".wf-avatar")
     .find("img")
@@ -92,32 +99,28 @@ async function getPlayerById(id) {
   const img = tempImg.includes("owcdn")
     ? "https:" + tempImg
     : vlrgg_url + tempImg;
-
   const user = $(".player-header").find(".wf-title").text().trim();
   const name = $(".player-header").find(".player-real-name").text().trim();
-
   const twitter = $(".player-header").last().find("a").eq(0).text().trim();
   const twitter_url = $(".player-header").last().find("a").eq(0).attr("href");
-
   const twitch = $(".player-header").last().find("a").eq(1).text().trim();
   const twitch_url = $(".player-header").last().find("a").eq(1).attr("href");
-
   const country = $(".player-header")
     .find("div")
     .last()
     .text()
     .trim()
     .toLowerCase();
-
   const flag = $(".player-header")
     .find(".flag")
     .attr("class")
     .split(" ")[1]
     .split("-")[1];
 
+  // Create the player object
   const player = {
     id,
-    url: `https://www.vlr.gg/player/${id}`,
+    url: `${vlrgg_url}/player/${id}`,
     img,
     user,
     name,
@@ -125,6 +128,7 @@ async function getPlayerById(id) {
     flag,
   };
 
+  // Extract social media information
   const socials = {
     twitter,
     twitter_url,
@@ -132,6 +136,7 @@ async function getPlayerById(id) {
     twitch_url,
   };
 
+  // Extract team information
   const teamId = $(".wf-module-item").attr("href")?.split("/")[2];
   const teamUrl = vlrgg_url + $(".wf-module-item").attr("href");
   const tempTeamLogo = $(".wf-module-item").first().find("img").attr("src");
@@ -155,6 +160,7 @@ async function getPlayerById(id) {
     .text()
     .trim();
 
+  // Create the team object
   const team = {
     id: teamId,
     url: teamUrl,
@@ -163,6 +169,7 @@ async function getPlayerById(id) {
     joined: teamDate,
   };
 
+  // Combine player, team, and social information into a single object
   const data = {
     info: player,
     team,

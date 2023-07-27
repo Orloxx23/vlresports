@@ -2,7 +2,7 @@ const { Router } = require("express");
 const router = Router();
 const teamsController = require("../../../controllers/teamsController");
 
-// Endpoint to retrieve team information
-router.get("/:id", teamsController.getTeam);
+router.get("/", teamsController.getTeams);
+router.get("/:id", teamsController.getTeamById);
 
 module.exports = router;
