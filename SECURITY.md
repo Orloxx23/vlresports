@@ -4,7 +4,7 @@
 
 We take security issues in our API seriously. If you discover any security vulnerabilities or concerns regarding our scraping API for vlr.gg, please report them to us immediately. We appreciate your responsible disclosure.
 
-To report a security issue, please send an email to [security@example.com](mailto:security@example.com) and provide the following details:
+To report a security issue, please send an email to [orminamadro@gmail.com](mailto:orminamadro@gmail.com) and provide the following details:
 
 - A clear description of the vulnerability or security concern.
 - Steps to reproduce the issue, if possible.
@@ -24,7 +24,7 @@ This API is not affiliated with, endorsed by, or connected to vlr.gg or Riot Gam
 
 ## Contact
 
-For any security-related inquiries, concerns, or reports, please contact us at [security@example.com](mailto:security@example.com).
+For any security-related inquiries, concerns, or reports, please contact us at [orminamadro@gmail.com](mailto:orminamadro@gmail.com).
 
 ---
 Last updated: [July 28, 2023]
