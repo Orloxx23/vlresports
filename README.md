@@ -31,13 +31,13 @@
 
 ## 📖 Table of Contents
 
-- [Introduction](#introduction)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Contributing](#contributing)
-- [License](#license)
+- [Introduction](#-introduction)
+- [Features](#-features)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [API Endpoints](#-api-endpoints)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## 🚀 Introduction
 
