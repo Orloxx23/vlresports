@@ -19,6 +19,6 @@
     "request-promise": "^4.2.6"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^3.0.1"
   }
 }
