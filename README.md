@@ -6,20 +6,16 @@
 
 <p align="center">
   <a href="https://opensource.org/licenses/Apache-2.0">
-    <img src="https://img.shields.io/github/license/orloxx23/vlresports?style=for-the-badge
-" alt="License" />
+    <img src="https://img.shields.io/github/license/orloxx23/vlresports?style=for-the-badge" alt="License" />
   </a>
   <a href="https://github.com/Orloxx23/vlresports/stargazers">
-    <img src="https://img.shields.io/github/stars/orloxx23/vlresports?style=for-the-badge
-" alt="GitHub stars" />
+    <img src="https://img.shields.io/github/stars/orloxx23/vlresports?style=for-the-badge" alt="GitHub stars" />
   </a>
   <a href="https://github.com/Orloxx23/vlresports/network">
-    <img src="https://img.shields.io/github/forks/orloxx23/vlresports?style=for-the-badge
-" alt="GitHub forks" />
+    <img src="https://img.shields.io/github/forks/orloxx23/vlresports?style=for-the-badge" alt="GitHub forks" />
   </a>
   <a href="https://github.com/Orloxx23/vlresports/issues">
-    <img src="https://img.shields.io/github/issues/orloxx23/vlresports?style=for-the-badge
-" alt="GitHub issues" />
+    <img src="https://img.shields.io/github/issues/orloxx23/vlresports?style=for-the-badge" alt="GitHub issues" />
   </a>
   <img alt="Status" src="https://img.shields.io/website?url=https%3A%2F%2Falert-puce-neckerchief.cyclic.app%2F&style=for-the-badge&label=status"/>
 
