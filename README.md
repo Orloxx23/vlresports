@@ -103,7 +103,7 @@ The following are the main endpoints provided by the API:
 
 ## 🤝 Contributing
 
-Contributions to vlresports are welcome and greatly appreciated. If you wish to contribute, please follow the guidelines outlined in the CONTRIBUTING.md file.
+Contributions to vlresports are welcome and greatly appreciated. If you wish to contribute, please follow the guidelines outlined in the [CONTRIBUTING.md](https://github.com/Orloxx23/vlresports/blob/main/CONTRIBUTING.md) file.
 
 ## 📝 License
 
