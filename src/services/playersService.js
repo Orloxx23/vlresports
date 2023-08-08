@@ -91,6 +91,11 @@ async function getPlayerById(id) {
     transform: (body) => cheerio.load(body),
   });
 
+  const $matches = await request({
+    uri: `${vlrgg_url}/player/matches/${id}/?group=completed`,
+    transform: (body) => cheerio.load(body),
+  });
+
   // Extract player information
   const tempImg = $(".player-header")
     .find(".wf-avatar")
@@ -169,10 +174,113 @@ async function getPlayerById(id) {
     joined: teamDate,
   };
 
+  let results = [];
+  // Extract past matches information
+  $matches(".m-item-result")
+    .not(".m-item-games-result")
+    .parent()
+    .slice(0, 5)
+    .map((i, el) => {
+      const match_id = $(el).attr("href").split("/")[1];
+      const match_url = vlrgg_url + $(el).attr("href");
+      const event_logo =
+        "https:" + $(el).find(".m-item-thumb").find("img").attr("src");
+      const event_name = $(el)
+        .find(".m-item-event")
+        .find(".text-of")
+        .text()
+        .trim();
+      const team1 = {
+        name: $(el)
+          .find(".m-item-team")
+          .first()
+          .find(".m-item-team-name")
+          .text()
+          .trim(),
+        tag: $(el)
+          .find(".m-item-team")
+          .first()
+          .find(".m-item-team-tag")
+          .text()
+          .trim(),
+        logo: $(el)
+          .find(".m-item-logo img")
+          .first()
+          .attr("src")
+          .includes("/img/vlr")
+          ? vlrgg_url + $(el).find(".m-item-logo img").first().attr("src")
+          : "https:" + $(el).find(".m-item-logo img").first().attr("src"),
+        points: $(el).find(".m-item-result").find("span").first().text().trim(),
+      };
+      const team2 = {
+        name: $(el)
+          .find(".m-item-team")
+          .last()
+          .find(".m-item-team-name")
+          .text()
+          .trim(),
+        tag: $(el)
+          .find(".m-item-team")
+          .last()
+          .find(".m-item-team-tag")
+          .text()
+          .trim(),
+        logo: $(el)
+          .find(".m-item-logo img")
+          .last()
+          .attr("src")
+          .includes("/img/vlr")
+          ? vlrgg_url + $(el).find(".m-item-logo img").last().attr("src")
+          : "https:" + $(el).find(".m-item-logo img").last().attr("src"),
+        points: $(el).find(".m-item-result").find("span").last().text().trim(),
+      };
+
+      const match = {
+        match: {
+          id: match_id,
+          url: match_url,
+        },
+        event: {
+          name: event_name,
+          logo: event_logo,
+        },
+        teams: [team1, team2],
+      };
+      results.push(match);
+    });
+
+  let pastTeams = [];
+  $(".wf-module-item")
+    .eq(1)
+    .parent()
+    .find("a")
+    .map((i, el) => {
+      const teamId = $(el).attr("href").split("/")[2];
+      const teamUrl = vlrgg_url + $(el).attr("href");
+      const tempTeamLogo = $(el).find("img").attr("src");
+      const teamLogo = tempTeamLogo?.includes("owcdn")
+        ? "https:" + tempTeamLogo
+        : vlrgg_url + tempTeamLogo;
+      const teamName = $(el).find("div").eq(1).children().first().text().trim();
+      const teamDate = $(el).find("div").last().text().trim();
+
+      const team = {
+        id: teamId,
+        url: teamUrl,
+        name: teamName,
+        logo: teamLogo,
+        info: teamDate,
+      };
+
+      pastTeams.push(team);
+    });
+
   // Combine player, team, and social information into a single object
   const data = {
     info: player,
     team,
+    results,
+    pastTeams,
     socials,
   };
 
