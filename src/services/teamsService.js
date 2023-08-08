@@ -107,12 +107,12 @@ async function getTeams(pagination, region) {
  */
 async function getTeamById(id) {
   const $ = await request({
-    uri: `https://www.vlr.gg/team/${id}`,
+    uri: `${vlrgg_url}/team/${id}`,
     transform: (body) => cheerio.load(body),
   });
 
   const $matches = await request({
-    uri: `https://www.vlr.gg/team/matches/${id}/?group=completed`,
+    uri: `${vlrgg_url}/team/matches/${id}/?group=completed`,
     transform: (body) => cheerio.load(body),
   });
 
