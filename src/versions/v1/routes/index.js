@@ -4,7 +4,7 @@ const router = new Router();
 router.get("/", (req, res) => {
   const data = {
     name: "Orlando Mina (Orloxx)",
-    website: "orlandomm.me",
+    website: "orlandomm.net",
   };
   res.json(data);
 });
