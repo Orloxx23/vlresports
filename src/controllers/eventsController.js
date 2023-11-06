@@ -23,15 +23,17 @@ const getEvents = async (req, res) => {
     "jp",
     "japan",
     "las",
-    "la-s",
     "lan",
-    "la-n",
+    "latin-america",
     "oce",
     "oceania",
+    "mn",
     "mena",
     "gc",
+    "game-changers",
     "world",
     "all",
+    "collegiate",
   ];
 
   const regionQuery = req.query.region || "all";
@@ -77,10 +79,10 @@ const getEvents = async (req, res) => {
       region = "japan";
       break;
     case "las":
-      region = "la-s";
+      region = "latin-america";
       break;
     case "lan":
-      region = "la-n";
+      region = "latin-america";
       break;
     case "oce":
       region = "oceania";
@@ -89,7 +91,7 @@ const getEvents = async (req, res) => {
       region = "mena";
       break;
     case "gc":
-      region = "gc";
+      region = "game-changers";
       break;
     case "world":
       region = "all";

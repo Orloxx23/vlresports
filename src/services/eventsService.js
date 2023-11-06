@@ -32,7 +32,7 @@ async function getEvents(status, region, page) {
 
     // Check if the event status matches the provided status or if status is "all"
     if (status === "all" || eventStatus === status) {
-      // Extract prize pool, dates, region, and event image URL
+      // Extract prize pool, dates, country, and event image URL
       const prizepoolText = $(element)
         .find(".event-item-desc-item.mod-prize")
         .text()
@@ -46,7 +46,7 @@ async function getEvents(status, region, page) {
         .match(/[a-zA-Z]+|\d+/g)
         .join(" ")
         .replace(" Dates", "");
-      const region = $(element)
+      const country = $(element)
         .find(".event-item-desc-item.mod-location .flag")
         .attr("class")
         .split(" ")[1]
@@ -65,7 +65,7 @@ async function getEvents(status, region, page) {
         status: eventStatus,
         prizepool,
         dates,
-        region,
+        country,
         img,
       });
     }
