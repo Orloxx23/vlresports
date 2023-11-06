@@ -1,13 +1,9 @@
-const teamsService = require("../services/teamsService");
+const eventsService = require("../services/eventsService");
 const catchError = require("../utils/catchError");
 
-const getTeams = async (req, res) => {
+const getEvents = async (req, res) => {
+  const status = req.query.status || "all";
   const page = parseInt(req.query.page) || 1;
-  const limit = req.query.limit || 10;
-  const pagination = {
-    page,
-    limit,
-  };
 
   const regionAvailable = [
     "na",
@@ -106,43 +102,34 @@ const getTeams = async (req, res) => {
   }
 
   try {
-    const {
-      teams,
-      pagination: { totalElements, totalPages, hasNextPage },
-    } = await teamsService.getTeams(pagination, region);
-
-    res.status(200).json({
-      status: "OK",
+    const { size, events } = await eventsService.getEvents(
+      status,
       region,
-      size: teams.length,
-      pagination: {
-        page,
-        limit,
-        totalElements,
-        totalPages,
-        hasNextPage,
-      },
-      data: teams,
-    });
-  } catch (error) {
-    catchError(res, error);
-  }
-};
+      page
+    );
 
-const getTeamById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const team = await teamsService.getTeamById(id);
     res.status(200).json({
       status: "OK",
-      data: team,
+      size,
+      data: events,
     });
-  } catch (error) {
-    catchError(res, error);
-  }
+  } catch (error) {}
 };
+
+// To do: Add getEventById
+/*const getEventById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const event = await eventsService.getEventById(id);
+
+    res.status(200).json({
+      status: "OK",
+      data: event,
+    });
+  } catch (error) {}
+};*/
 
 module.exports = {
-  getTeams,
-  getTeamById,
+  getEvents,
 };
