@@ -96,6 +96,9 @@ The following are the main endpoints provided by the API:
 - `GET /api/v1/players/{player_id}`: Retrieve information about a specific player.
 - `GET /api/v1/teams`: Retrieve information about all teams.
 - `GET /api/v1/teams/{team_id}`: Retrieve information about a specific team.
+- `GET /api/v1/events`: Retrieve information about all events.
+- `GET /api/v1/matches`: Retrieve information about upcoming matches or matches being played.
+- `GET /api/v1/results`: Retrieve information about past match results.
 
 ## 🤝 Contributing
 
