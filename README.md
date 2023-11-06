@@ -1,7 +1,7 @@
 <h1 align="center">vlresports - Valorant Esports API</h1>
 
 <p align="center">
-  <img src="https://i.imgur.com/YEjo9XY.png" width="180px" alt="Valorant Competitive API" />
+  <img src="https://i.imgur.com/ZSMbOPL.png" width="300px" alt="Valorant Competitive API" />
 </p>
 
 <p align="center">
