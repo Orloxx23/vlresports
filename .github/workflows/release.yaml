@@ -1,0 +1,41 @@
+name: New Release
+
+on:
+  release:
+    types:
+      - published
+  push:
+    branches:
+      - main
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: Create docker context
+        id: buildx-context
+        run: docker context create builders
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          version: latest
+          endpoint: builders
+      - name: Login to registry
+        uses: docker/login-action@v2
+        with:
+          registry: landsys.net:5000
+          username: pol
+          password: ${{ secrets.LANDSYS_DOCKER_REGISTER_PASSWD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          file: ./dockerfile
+          context: .
+          push: true
+          tags: landsys.net:5000/vlresports:${{ github.ref_name }}
+          network: host

@@ -1,7 +1,7 @@
 <h1 align="center">vlresports - Valorant Esports API</h1>
 
 <p align="center">
-  <img src="https://i.imgur.com/YEjo9XY.png" width="180px" alt="Valorant Competitive API" />
+  <img src="https://i.imgur.com/ZSMbOPL.png" width="300px" alt="Valorant Competitive API" />
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
   <a href="https://github.com/Orloxx23/vlresports/issues">
     <img src="https://img.shields.io/github/issues/orloxx23/vlresports?style=for-the-badge" alt="GitHub issues" />
   </a>
-  <img alt="Status" src="https://img.shields.io/website?url=https%3A%2F%2Falert-puce-neckerchief.cyclic.app%2F&style=for-the-badge&label=status"/>
+  <img alt="Status" src="https://img.shields.io/website?url=https%3A%2F%2Fvlr.orlandomm.net%2F&style=for-the-badge&label=status"/>
 
 </p>
 
