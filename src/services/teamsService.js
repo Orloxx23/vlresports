@@ -33,9 +33,22 @@ async function getTeams(pagination, region) {
       .map((i, el) => {
         // Extract team information from the table row
         const name = $(el).find("td").first().next().attr("data-sort-value");
-        const id = $(el).find("td").first().next().find("a").attr("href").split("/")[2];
-        const url = vlrgg_url + $(el).find("td").first().next().find("a").attr("href");
-        const img = $(el).find("td").first().next().find("img").attr("src").includes("/img/vlr")
+        const id = $(el)
+          .find("td")
+          .first()
+          .next()
+          .find("a")
+          .attr("href")
+          .split("/")[2];
+        const url =
+          vlrgg_url + $(el).find("td").first().next().find("a").attr("href");
+        const img = $(el)
+          .find("td")
+          .first()
+          .next()
+          .find("img")
+          .attr("src")
+          .includes("/img/vlr")
           ? vlrgg_url + $(el).find("td").first().next().find("img").attr("src")
           : "https:" + $(el).find("td").first().next().find("img").attr("src");
         const country = $(el).find(".rank-item-team-country").text().trim();
@@ -62,7 +75,12 @@ async function getTeams(pagination, region) {
         const name = $(el).find("a").first().attr("data-sort-value");
         const id = $(el).find("a").first().attr("href").split("/")[2];
         const url = vlrgg_url + $(el).find("a").first().attr("href");
-        const img = $(el).find("a").first().find("img").attr("src").includes("/img/vlr")
+        const img = $(el)
+          .find("a")
+          .first()
+          .find("img")
+          .attr("src")
+          .includes("/img/vlr")
           ? vlrgg_url + $(el).find("a").first().find("img").attr("src")
           : "https:" + $(el).find("a").first().find("img").attr("src");
         const country = $(el).find(".rank-item-team-country").text().trim();
@@ -80,9 +98,10 @@ async function getTeams(pagination, region) {
   }
 
   // Get the total number of pages
-  const totalElements = region === "all"
-    ? $("tr").has("td").length
-    : $(".mod-scroll").find(".fa-certificate").parent().parent().length;
+  const totalElements =
+    region === "all"
+      ? $("tr").has("td").length
+      : $(".mod-scroll").find(".fa-certificate").parent().parent().length;
   const totalPages = Math.ceil(totalElements / pagination.limit);
 
   // Check if there is a next page
@@ -119,6 +138,7 @@ async function getTeamById(id) {
   let roster = [];
   let players = [];
   let staff = [];
+  let inactive = [];
 
   let events = [];
 
@@ -208,7 +228,11 @@ async function getTeamById(id) {
           .split(" ")[1]
           .replace("mod-", ""),
       };
-      staff.push(staffMember);
+      if (staffMember.tag === "Inactive") {
+        inactive.push(staffMember);
+      } else {
+        staff.push(staffMember);
+      }
     } else {
       // Player
       const player = {
@@ -370,6 +394,7 @@ async function getTeamById(id) {
     info,
     players,
     staff,
+    inactive,
     events,
     results,
     upcoming,
