@@ -12,7 +12,7 @@ const getPlayers = async (req, res) => {
   const event_series = req.query.event_series || "all";
   const event = req.query.event || "all";
   const country = req.query.country || "all";
-  const region = req.query.regions || "all";
+  const region = req.query.region || "all";
   const minrounds = req.query.minrounds || 200;
   const minrating = req.query.minrating || 1550;
   const agent = req.query.agent || "all";
