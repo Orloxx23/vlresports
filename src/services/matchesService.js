@@ -42,6 +42,16 @@ async function getMatches() {
       .split(" ")[1]
       .replace("mod-", "");
 
+    const teamsScores = $(element)
+      .find(".match-item-vs-team-score")
+      .text()
+      .replace(/\t/g, "")
+      .trim();
+    const [pointsTeam1, pointsTeam2] = teamsScores
+      .split("\n")
+      .map((item) => item.trim())
+      .filter((item) => item !== "");
+
     // Extract match status, event name, tournament name, match image URL, match ETA, and match ID
     const status = $(element).find(".ml-status").text().trim();
     const event = $(element).find(".match-item-event-series").text().trim();
@@ -69,10 +79,12 @@ async function getMatches() {
         {
           name: team1,
           country: countryTeam1,
+          score: pointsTeam1 !== "–" ? pointsTeam1 : null,
         },
         {
           name: team2,
           country: countryTeam2,
+          score: pointsTeam2 !== "–" ? pointsTeam2 : null,
         },
       ],
       status,
