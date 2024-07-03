@@ -303,6 +303,10 @@ async function getTeamById(id) {
           .trim(),
         logo: "https:" + $(el).find(".m-item-logo img").last().attr("src"),
       };
+
+      const date = $(el).find(".m-item-date div").text().trim();
+      const time = $(el).find(".m-item-date").text().replace(date, "").trim();
+      const utcString = new Date(date + " " + time).toUTCString();
       const match = {
         match: {
           id: match_id,
@@ -313,6 +317,7 @@ async function getTeamById(id) {
           logo: event_logo,
         },
         teams: [team1, team2],
+        utc: utcString,
       };
       upcoming.push(match);
     });
@@ -375,6 +380,9 @@ async function getTeamById(id) {
           : "https:" + $(el).find(".m-item-logo img").last().attr("src"),
         points: $(el).find(".m-item-result").find("span").last().text().trim(),
       };
+      const date = $(el).find(".m-item-date div").text().trim();
+      const time = $(el).find(".m-item-date").text().replace(date, "").trim();
+      const utcString = new Date(date + " " + time).toUTCString();
 
       const match = {
         match: {
@@ -386,6 +394,7 @@ async function getTeamById(id) {
           logo: event_logo,
         },
         teams: [team1, team2],
+        utc: utcString,
       };
       results.push(match);
     });
