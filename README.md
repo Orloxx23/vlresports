@@ -104,6 +104,10 @@ The following are the main endpoints provided by the API:
 
 Contributions to vlresports are welcome and greatly appreciated. If you wish to contribute, please follow the guidelines outlined in the [CONTRIBUTING.md](https://github.com/Orloxx23/vlresports/blob/main/CONTRIBUTING.md) file.
 
+<a href="https://github.com/Orloxx23/vlresports/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Orloxx23/vlresports" />
+</a>
+
 ## 📝 License
 
 vlresports is open-source and available under the [Apache 2.0 License](https://github.com/Orloxx23/vlresports/blob/main/LICENSE).
