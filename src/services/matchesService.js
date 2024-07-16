@@ -103,8 +103,8 @@ async function getMatches() {
       img,
       in: matchETA,
       timestamp,
-      utcDate: newDate,
-      utc: utcString
+      utcDate: utcString,
+      utc: newDate
     });
   });
 
