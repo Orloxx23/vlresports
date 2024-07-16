@@ -72,6 +72,16 @@ async function getMatches() {
     const matchETA = $(element).find(".ml-eta").text().trim();
     const id = $(element).attr("href").split("/")[1];
 
+    const parent = $(element.parent);
+    const dateContaier = parent.prev();
+    const date = dateContaier.text().trim().replace("Today", "");
+    const time = $(element).find(".match-item-time").text().trim();
+    const dateAndTime = date + " " + time;
+    const newDate = new Date(dateAndTime);
+    let timestamp = newDate.getTime();
+    timestamp = Math.floor(timestamp / 1000);
+    const utcString = newDate.toUTCString();
+
     // Create match object and push it to the matches array
     matches.push({
       id,
@@ -92,6 +102,9 @@ async function getMatches() {
       tournament,
       img,
       in: matchETA,
+      timestamp,
+      utcDate: newDate,
+      utc: utcString
     });
   });
 
@@ -100,6 +113,38 @@ async function getMatches() {
     size: matches.length,
     matches,
   };
+}
+
+function parseDateString(dateStr) {
+  const months = {
+    January: 0,
+    February: 1,
+    March: 2,
+    April: 3,
+    May: 4,
+    June: 5,
+    July: 6,
+    August: 7,
+    September: 8,
+    October: 9,
+    November: 10,
+    December: 11,
+  };
+
+  const parts = dateStr.split(" ");
+  const dayOfWeek = parts[0].replace(",", ""); // e.g., "Sat"
+  const month = months[parts[1]]; // e.g., "July" -> 6
+  const day = parseInt(parts[2].replace(",", ""), 10); // e.g., "20"
+  const year = parseInt(parts[3], 10); // e.g., "2024"
+  const timeParts = parts[4].split(":"); // e.g., "3:00"
+  let hours = parseInt(timeParts[0], 10); // e.g., "3"
+  const minutes = parseInt(timeParts[1], 10); // e.g., "00"
+  const ampm = parts[5]; // e.g., "AM"
+
+  if (ampm === "PM" && hours < 12) hours += 12;
+  if (ampm === "AM" && hours === 12) hours = 0;
+
+  return new Date(Date.UTC(year, month, day, hours, minutes));
 }
 
 module.exports = {
