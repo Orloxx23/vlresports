@@ -42,9 +42,8 @@ async function initializeDatabase() {
           endpoint_category VARCHAR(100)
         )
       `);
-    console.log("Base de datos de analíticas inicializada correctamente");
   } catch (err) {
-    console.error("Error al inicializar la base de datos de analíticas:", err);
+    console.error("Error initializing database:", err);
   }
 }
 
