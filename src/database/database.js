@@ -27,6 +27,8 @@ async function initializeDatabase() {
           
           -- New detailed fields
           referrer TEXT,
+          origin TEXT,
+          host TEXT,
           browser VARCHAR(100),
           browser_version VARCHAR(50),
           os VARCHAR(100),

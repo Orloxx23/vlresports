@@ -1,105 +1,102 @@
 const { v4: uuidv4 } = require("uuid");
-const geoip = require("geoip-lite"); // npm install geoip-lite
+const geoip = require("geoip-lite");
 const { pool } = require("../database/database");
+
+function normalizeIp(ip) {
+  if (!ip) return "unknown";
+  if (ip === "::1" || ip === "0:0:0:0:0:0:0:1") return "127.0.0.1";
+  if (ip.startsWith("::ffff:")) return ip.replace("::ffff:", "");
+  return ip;
+}
+
+function isLocalOrPrivateIp(ip) {
+  if (!ip) return true;
+  if (ip === "127.0.0.1" || ip === "localhost" || ip === "0.0.0.0") return true;
+  if (ip.startsWith("10.")) return true;
+  if (ip.startsWith("192.168.")) return true;
+  // 172.16.0.0 – 172.31.255.255
+  const match = ip.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./);
+  if (match) return true;
+  return false;
+}
 
 function enhancedAnalyticsMiddleware(req, res, next) {
   const startTime = Date.now();
 
-  // Save the original send function
-  const originalSend = res.send;
-  const originalJson = res.json;
-  const originalEnd = res.end;
+  const originalPath = req.path;
+  const originalMethod = req.method;
+  const originalBody = req.body || {};
+  const originalQuery = req.query || {};
+  const userAgentString = req.headers["user-agent"] || "";
+  const referer = req.headers.referer || "";
+  const rawIp = req.ip || req.connection.remoteAddress;
+  const ip = normalizeIp(rawIp);
+  console.log("🚀 ~ enhancedAnalyticsMiddleware ~ ip:", ip)
+  const origin = req.headers.origin || "";
+  const host = req.headers.host || "";
+  let originDomain = "";
+  try {
+    if (referer) {
+      const url = new URL(referer);
+      originDomain = url.hostname;
+    }
+  } catch (e) {}
 
-  // Function to store analytics data
-  const saveAnalytics = (responseBody, contentLength) => {
-    // Calculate response time
+  res.on('finish', () => {
     const responseTime = Date.now() - startTime;
-
-    // Identify API version from the route
     let version = "unknown";
-    if (req.path.includes("/v1/")) {
+    if (originalPath.includes("/v1/")) {
       version = "v1";
     }
-
-    // Get location information based on IP
-    const ip = req.ip || req.connection.remoteAddress;
-    const geo = geoip.lookup(ip) || {
-      country: "unknown",
-      region: "unknown",
-      city: "unknown",
-    };
-
-    // Categorize the endpoint based on the path
-    let category = "other";
-    if (req.path.includes("/teams")) category = "teams";
-    else if (req.path.includes("/players")) category = "players";
-    else if (req.path.includes("/events")) category = "events";
-    else if (req.path.includes("/matches")) category = "matches";
-    else if (req.path.includes("/results")) category = "results";
-    else if (req.path.includes("/analytics")) category = "analytics";
-
-    // Extract origin domain from referrer
-    const referer = req.headers.referer || "";
-    let originDomain = "";
-    try {
-      if (referer) {
-        const url = new URL(referer);
-        originDomain = url.hostname;
-      }
-    } catch (e) {
-      // If URL parsing fails, leave originDomain empty
+    let geo = { country: "unknown", region: "unknown", city: "unknown" };
+    if (isLocalOrPrivateIp(ip)) {
+      geo = { country: "local", region: "local", city: "local" };
+    } else {
+      geo = geoip.lookup(ip) || geo;
     }
-
-    // Ensure boolean fields are actual booleans
-    // This is the main fix for the Postman error
+    let category = "other";
+    if (originalPath.includes("/teams")) category = "teams";
+    else if (originalPath.includes("/players")) category = "players";
+    else if (originalPath.includes("/events")) category = "events";
+    else if (originalPath.includes("/matches")) category = "matches";
+    else if (originalPath.includes("/results")) category = "results";
+    else if (originalPath.includes("/analytics")) category = "analytics";
+    
     let isMobile = false;
     let isBot = false;
-
-    // Check User-Agent to detect Postman
-    const userAgentString = req.headers["user-agent"] || "";
-
-    // Specifically detect Postman
     if (userAgentString.toLowerCase().includes("postman")) {
-      isBot = true; // Consider Postman as a bot
+      isBot = true;
     } else {
-      // Use useragent values if available and boolean
-      isMobile =
-        typeof req.useragent.isMobile === "boolean"
-          ? req.useragent.isMobile
-          : false;
-      isBot =
-        typeof req.useragent.isBot === "boolean" ? req.useragent.isBot : false;
+      isMobile = typeof req.useragent?.isMobile === "boolean" ? req.useragent.isMobile : false;
+      isBot = typeof req.useragent?.isBot === "boolean" ? req.useragent.isBot : false;
     }
-
-    // Safely extract browser information
     const browser = (req.useragent && req.useragent.browser) || "unknown";
-    const browserVersion =
-      (req.useragent && req.useragent.version) || "unknown";
+    const browserVersion = (req.useragent && req.useragent.version) || "unknown";
     const os = (req.useragent && req.useragent.os) || "unknown";
     const platform = (req.useragent && req.useragent.platform) || "unknown";
-
-    // Collect request data with extended information
+    
+    const contentLength = res.getHeader('Content-Length') ? parseInt(res.getHeader('Content-Length')) : 0;
     const analyticsData = {
       id: uuidv4(),
-      method: req.method,
-      path: req.path,
+      method: originalMethod,
+      path: originalPath,
       status_code: res.statusCode,
       response_time_ms: responseTime,
-      response_size: contentLength || 0,
+      response_size: contentLength,
       user_agent: userAgentString,
       ip_address: ip,
-      request_body: req.body || {},
-      query_params: req.query || {},
+      request_body: originalBody,
+      query_params: originalQuery,
       version: version,
-
-      // Detailed information (corrected)
       referrer: referer,
+      origin: origin,
+      host: host,
       browser: browser,
       browser_version: browserVersion,
       os: os,
       platform: platform,
-      is_mobile: isMobile, // Now guaranteed to be boolean
-      is_bot: isBot, // Now guaranteed to be boolean
+      is_mobile: isMobile,
+      is_bot: isBot,
       country: geo.country,
       region: geo.region,
       city: geo.city,
@@ -107,19 +104,17 @@ function enhancedAnalyticsMiddleware(req, res, next) {
       request_headers: req.headers,
       endpoint_category: category,
     };
-
-    // Store data in the database asynchronously
     (async () => {
       try {
         await pool.query(
           `
             INSERT INTO api_requests 
             (id, method, path, status_code, response_time_ms, user_agent, ip_address, 
-             request_body, query_params, version, referrer, browser, browser_version, 
+             request_body, query_params, version, referrer, origin, host, browser, browser_version, 
              os, platform, is_mobile, is_bot, country, region, city, origin_domain, 
              request_headers, response_size, endpoint_category)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 
-                    $16, $17, $18, $19, $20, $21, $22, $23, $24)
+                    $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
           `,
           [
             analyticsData.id,
@@ -133,6 +128,8 @@ function enhancedAnalyticsMiddleware(req, res, next) {
             JSON.stringify(analyticsData.query_params),
             analyticsData.version,
             analyticsData.referrer,
+            analyticsData.origin,
+            analyticsData.host,
             analyticsData.browser,
             analyticsData.browser_version,
             analyticsData.os,
@@ -155,40 +152,7 @@ function enhancedAnalyticsMiddleware(req, res, next) {
         console.error("Error saving analytics data:", err);
       }
     })();
-  };
-
-  // Replace the original send function
-  res.send = function (body) {
-    let contentLength = 0;
-    if (body) {
-      contentLength = Buffer.isBuffer(body)
-        ? body.length
-        : Buffer.byteLength(String(body));
-    }
-    saveAnalytics(body, contentLength);
-    return originalSend.apply(res, arguments);
-  };
-
-  // Also override json to capture JSON responses
-  res.json = function (body) {
-    const json = JSON.stringify(body);
-    const contentLength = Buffer.byteLength(json);
-    saveAnalytics(body, contentLength);
-    return originalJson.apply(res, arguments);
-  };
-
-  // Override end to capture other response types
-  res.end = function (chunk, encoding) {
-    let contentLength = 0;
-    if (chunk) {
-      contentLength = Buffer.isBuffer(chunk)
-        ? chunk.length
-        : Buffer.byteLength(String(chunk));
-    }
-    saveAnalytics(chunk, contentLength);
-    return originalEnd.apply(res, arguments);
-  };
-
+  });
   next();
 }
 
