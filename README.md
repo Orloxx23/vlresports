@@ -86,7 +86,7 @@ curl -X GET http://localhost:5000/api/v1/players/{player_id}
 curl -X GET http://localhost:5000/api/v1/teams/{team_id}
 ```
 
-Please refer to the <a href="https://vlresports.vercel.app">API documentation</a> for more detailed usage instructions and examples. You can also try out the API using the interactive documentation provided by <a href="https://app.swaggerhub.com/apis-docs/Orloxx23/Valorant-Esports/" target="_blank">Swagger UI</a>.
+Please refer to the <a href="https://vlresports.vercel.app">API documentation</a> for more detailed usage instructions and examples. You can also try out the API using the interactive documentation provided by <a href="https://app.swaggerhub.com/apis-docs/Orloxx23/Valorant-Esports/" target="_blank">Swagger UI</a>. If you want more technical documentation, you can go to <a href="https://deepwiki.com/Orloxx23/vlresports">Deep Wiki/vlresports</a>
 
 ## 📚 API Endpoints
 
