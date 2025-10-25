@@ -131,3 +131,6 @@ dist
 
 # personal todo
 todo.md
+
+# package-lock for CI consistency
+package-lock.json
