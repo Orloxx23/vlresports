@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "vlresports - Valorant Esports API",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "API for scraping Valorant esports data from vlr.gg\n\n**Important:** All IDs (players, teams, events, matches) used in this API correspond to the IDs from vlr.gg. You can find these IDs in the URLs on the vlr.gg website.",
     "license": {
       "name": "Apache 2.0",

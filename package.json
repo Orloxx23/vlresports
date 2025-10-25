@@ -1,11 +1,12 @@
 {
   "name": "vrlggscraper",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A simple API for Valorant Esports Scraper",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/.",
-    "dev": "nodemon src/."
+    "dev": "nodemon src/.",
+    "test": "jest"
   },
   "keywords": [
     "valorant",
@@ -36,6 +37,7 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "nodemon": "^3.0.1"
   }
 }
