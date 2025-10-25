@@ -1,4 +1,4 @@
-const request = require("request-promise");
+const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 
@@ -18,10 +18,8 @@ async function getTeams(pagination, region) {
     pagination.limit !== "all" ? pagination.page * pagination.limit : undefined;
 
   // Send a request to get the HTML content of the rankings page for the specified region
-  const $ = await request({
-    uri: `${vlrgg_url}/rankings/${region}`,
-    transform: (body) => cheerio.load(body),
-  });
+  const { data } = await axios.get(`${vlrgg_url}/rankings/${region}`);
+  const $ = cheerio.load(data);
 
   const teams = [];
 
@@ -125,15 +123,11 @@ async function getTeams(pagination, region) {
  * @returns {Object} - Team information.
  */
 async function getTeamById(id) {
-  const $ = await request({
-    uri: `${vlrgg_url}/team/${id}`,
-    transform: (body) => cheerio.load(body),
-  });
+  const { data } = await axios.get(`${vlrgg_url}/team/${id}`);
+  const $ = cheerio.load(data);
 
-  const $matches = await request({
-    uri: `${vlrgg_url}/team/matches/${id}/?group=completed`,
-    transform: (body) => cheerio.load(body),
-  });
+  const matchesResponse = await axios.get(`${vlrgg_url}/team/matches/${id}/?group=completed`);
+  const $matches = cheerio.load(matchesResponse.data);
 
   let roster = [];
   let players = [];

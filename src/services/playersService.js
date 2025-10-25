@@ -1,4 +1,4 @@
-const request = require("request-promise");
+const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 
@@ -17,10 +17,8 @@ async function getPlayers(pagination, filters) {
     pagination.limit !== "all" ? pagination.page * pagination.limit : undefined;
 
   // Make a request to the specified URL and load the response body using Cheerio
-  const $ = await request({
-    uri: `https://www.vlr.gg/stats/?event_group_id=${filters.event_series}&event_id=${filters.event}&region=${filters.region}&country=${filters.country}&min_rounds=${filters.minrounds}&min_rating=${filters.minrating}&agent=${filters.agent}&map_id=${filters.map}&timespan=${filters.timespan}`,
-    transform: (body) => cheerio.load(body),
-  });
+  const { data } = await axios.get(`https://www.vlr.gg/stats/?event_group_id=${filters.event_series}&event_id=${filters.event}&region=${filters.region}&country=${filters.country}&min_rounds=${filters.minrounds}&min_rating=${filters.minrating}&agent=${filters.agent}&map_id=${filters.map}&timespan=${filters.timespan}`);
+  const $ = cheerio.load(data);
 
   const players = [];
 
@@ -86,15 +84,11 @@ async function getPlayers(pagination, filters) {
  */
 async function getPlayerById(id) {
   // Send a request to get the HTML content of the player's profile page
-  const $ = await request({
-    uri: `${vlrgg_url}/player/${id}`,
-    transform: (body) => cheerio.load(body),
-  });
+  const { data } = await axios.get(`${vlrgg_url}/player/${id}`);
+  const $ = cheerio.load(data);
 
-  const $matches = await request({
-    uri: `${vlrgg_url}/player/matches/${id}/?group=completed`,
-    transform: (body) => cheerio.load(body),
-  });
+  const matchesResponse = await axios.get(`${vlrgg_url}/player/matches/${id}/?group=completed`);
+  const $matches = cheerio.load(matchesResponse.data);
 
   // Extract player information
   const tempImg = $(".player-header")
@@ -276,7 +270,7 @@ async function getPlayerById(id) {
     });
 
   // Combine player, team, and social information into a single object
-  const data = {
+  const playerData = {
     info: player,
     team,
     results,
@@ -284,7 +278,7 @@ async function getPlayerById(id) {
     socials,
   };
 
-  return data;
+  return playerData;
 }
 
 module.exports = {

@@ -23,6 +23,7 @@
   "author": "Orloxx23",
   "license": "Apache-2.0",
   "dependencies": {
+    "axios": "^1.12.2",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -31,7 +32,6 @@
     "geoip-lite": "^1.4.10",
     "morgan": "^1.10.0",
     "pg": "^8.14.1",
-    "request-promise": "^4.2.6",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

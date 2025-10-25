@@ -1,4 +1,4 @@
-const request = require("request-promise");
+const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 
@@ -8,10 +8,8 @@ const { vlrgg_url } = require("../constants");
  */
 async function getMatches() {
   // Send a request to the specified URL and parse the HTML response using cheerio
-  const $ = await request({
-    uri: `${vlrgg_url}/matches`,
-    transform: (body) => cheerio.load(body),
-  });
+  const { data } = await axios.get(`${vlrgg_url}/matches`);
+  const $ = cheerio.load(data);
 
   // Array to store match objects
   const matches = [];

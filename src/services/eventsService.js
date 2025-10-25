@@ -1,4 +1,4 @@
-const request = require("request-promise");
+const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 
@@ -11,10 +11,8 @@ const { vlrgg_url } = require("../constants");
  */
 async function getEvents(status, region, page) {
   // Send a request to the specified URL with the provided region and page number, then parse the HTML response using cheerio
-  const $ = await request({
-    uri: `${vlrgg_url}/events/${region}?page=${page}`,
-    transform: (body) => cheerio.load(body),
-  });
+  const { data } = await axios.get(`${vlrgg_url}/events/${region}?page=${page}`);
+  const $ = cheerio.load(data);
 
   // Array to store event objects
   const events = [];

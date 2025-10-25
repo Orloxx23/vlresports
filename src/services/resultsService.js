@@ -1,12 +1,10 @@
-const request = require("request-promise");
+const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 
 async function getResults(page) {
-  const $ = await request({
-    uri: `${vlrgg_url}/matches/results?page=${page}`,
-    transform: (body) => cheerio.load(body),
-  });
+  const { data } = await axios.get(`${vlrgg_url}/matches/results?page=${page}`);
+  const $ = cheerio.load(data);
 
   const results = [];
 
