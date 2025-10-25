@@ -2,16 +2,36 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 
+const TIER_MAP = {
+  vct: "60",
+  vcl: "61",
+  t3: "62",
+  "game-changers": "63",
+  collegiate: "64",
+  offseason: "67",
+  all: "all"
+};
+
+const REGION_MAP = {
+  americas: "26",
+  emea: "27",
+  pacific: "28",
+  china: "24",
+  all: "all"
+};
+
 /**
- * Retrieves and parses event data based on the provided status, region, and page number from a specified URL using cheerio and request modules.
+ * Retrieves and parses event data based on the provided status, region, tier, and page number from a specified URL using cheerio and request modules.
  * @param {string} status - The status of the events to filter ("all", "upcoming", "live", "completed").
  * @param {string} region - The region of the events to filter (e.g., "na", "eu").
+ * @param {string} tier - The tier of the events to filter (e.g., "vct", "vcl", "t3").
  * @param {number} page - The page number of the events to retrieve (default is 1).
  * @returns {Object} An object containing event details including event name, status, prize pool, dates, region, and event image URL.
  */
-async function getEvents(status, region, page) {
-  // Send a request to the specified URL with the provided region and page number, then parse the HTML response using cheerio
-  const { data } = await axios.get(`${vlrgg_url}/events/${region}?page=${page}`);
+async function getEvents(status, region, tier, page) {
+  const regionParam = REGION_MAP[region] || region;
+  const tierParam = tier ? `&tier=${TIER_MAP[tier] || tier}` : "";
+  const { data } = await axios.get(`${vlrgg_url}/events/?region=${regionParam}&page=${page}${tierParam}`);
   const $ = cheerio.load(data);
 
   // Array to store event objects
@@ -74,10 +94,6 @@ async function getEvents(status, region, page) {
     events: events,
     size: events.length,
   };
-}
-
-async function getEventById(id) {
-  /* TODO */
 }
 
 module.exports = {

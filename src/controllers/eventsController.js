@@ -4,109 +4,15 @@ const catchError = require("../utils/catchError");
 const getEvents = async (req, res) => {
   const status = req.query.status || "all";
   const page = parseInt(req.query.page) || 1;
+  const tier = req.query.tier || null;
 
-  const regionAvailable = [
-    "na",
-    "north-america",
-    "eu",
-    "europe",
-    "br",
-    "brazil",
-    "ap",
-    "asia-pacific",
-    "asia",
-    "pacific",
-    "kr",
-    "korea",
-    "ch",
-    "china",
-    "jp",
-    "japan",
-    "las",
-    "lan",
-    "latin-america",
-    "oce",
-    "oceania",
-    "mn",
-    "mena",
-    "gc",
-    "game-changers",
-    "world",
-    "all",
-    "collegiate",
-  ];
-
-  const regionQuery = req.query.region || "all";
-
-  if (!regionAvailable.includes(regionQuery)) {
-    res.status(400).json({
-      status: "error",
-      message: {
-        error: 400,
-        message: "Invalid region",
-      },
-    });
-    return;
-  }
-
-  let region;
-  switch (regionQuery) {
-    case "na":
-      region = "north-america";
-      break;
-    case "eu":
-      region = "europe";
-      break;
-    case "br":
-      region = "brazil";
-      break;
-    case "ap":
-      region = "asia-pacific";
-      break;
-    case "asia":
-      region = "asia-pacific";
-      break;
-    case "pacific":
-      region = "asia-pacific";
-      break;
-    case "kr":
-      region = "korea";
-      break;
-    case "ch":
-      region = "china";
-      break;
-    case "jp":
-      region = "japan";
-      break;
-    case "las":
-      region = "latin-america";
-      break;
-    case "lan":
-      region = "latin-america";
-      break;
-    case "oce":
-      region = "oceania";
-      break;
-    case "mena":
-      region = "mena";
-      break;
-    case "gc":
-      region = "game-changers";
-      break;
-    case "world":
-      region = "all";
-      break;
-    case "all":
-      region = "all";
-      break;
-    default:
-      region = regionQuery;
-  }
+  const region = req.query.region || "all";
 
   try {
     const { size, events } = await eventsService.getEvents(
       status,
       region,
+      tier,
       page
     );
 
