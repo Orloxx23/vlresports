@@ -1,9 +1,10 @@
 const express = require("express");
 const morgan = require("morgan");
 let cors = require("cors");
-const useragent = require("express-useragent"); // npm install express-useragent
+const useragent = require("express-useragent");
 const { initializeDatabase } = require("./database/database");
 const enhancedAnalyticsMiddleware = require("./middlewares/analytics");
+const openApiSpec = require("./openapi.json");
 
 const app = express();
 
@@ -17,6 +18,23 @@ app.use(enhancedAnalyticsMiddleware);
 app.use(useragent.express());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+// API Documentation (loaded dynamically)
+let scalarLoaded = false;
+import("@scalar/express-api-reference").then(({ apiReference }) => {
+  app.use(
+    "/docs",
+    apiReference({
+      spec: {
+        content: openApiSpec,
+      },
+    })
+  );
+  scalarLoaded = true;
+  console.log("API Documentation loaded at /docs");
+}).catch(err => {
+  console.error("Failed to load API documentation:", err.message);
+});
 
 // Routes
 app.use(require("./versions/v1/routes/index"));
@@ -39,4 +57,5 @@ initializeDatabase()
 // Starting server
 app.listen(app.get("port"), () => {
   console.log(`Server running on port ${app.get("port")}`);
+  console.log(`API Documentation will be available at http://localhost:${app.get("port")}/docs`);
 });

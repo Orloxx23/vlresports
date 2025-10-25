@@ -150,8 +150,6 @@ async function getTeamById(id) {
       : "https:" + $(".team-header").find(".team-header-logo img").attr("src"),
   };
 
-  console.log(info.logo);
-
   // Extract roster information
   $(".wf-card")
     .find(".team-roster-item")

@@ -31,7 +31,6 @@ function enhancedAnalyticsMiddleware(req, res, next) {
   const referer = req.headers.referer || "";
   const rawIp = req.ip || req.connection.remoteAddress;
   const ip = normalizeIp(rawIp);
-  console.log("🚀 ~ enhancedAnalyticsMiddleware ~ ip:", ip)
   const origin = req.headers.origin || "";
   const host = req.headers.host || "";
   let originDomain = "";
@@ -144,9 +143,6 @@ function enhancedAnalyticsMiddleware(req, res, next) {
             analyticsData.response_size,
             analyticsData.endpoint_category,
           ]
-        );
-        console.log(
-          `Analytics saved for: ${analyticsData.method} ${analyticsData.path}`
         );
       } catch (err) {
         console.error("Error saving analytics data:", err);

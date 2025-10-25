@@ -1,6 +1,6 @@
 {
   "name": "vrlggscraper",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A simple API for Valorant Esports Scraper",
   "main": "src/index.js",
   "scripts": {
@@ -23,6 +23,7 @@
   "author": "Orloxx23",
   "license": "Apache-2.0",
   "dependencies": {
+    "@scalar/express-api-reference": "^0.8.22",
     "axios": "^1.12.2",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",

@@ -1,0 +1,553 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "vlresports - Valorant Esports API",
+    "version": "1.0.5",
+    "description": "API for scraping Valorant esports data from vlr.gg\n\n**Important:** All IDs (players, teams, events, matches) used in this API correspond to the IDs from vlr.gg. You can find these IDs in the URLs on the vlr.gg website.",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://opensource.org/licenses/Apache-2.0"
+    },
+    "contact": {
+      "name": "Orloxx23",
+      "url": "https://github.com/Orloxx23/vlresports"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://vlr.orlandomm.net",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/api/v1/players": {
+      "get": {
+        "summary": "Get all players",
+        "description": "Retrieve a list of all Valorant professional players with optional filters",
+        "tags": ["Players"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of players per page",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "event_series",
+            "in": "query",
+            "description": "Filter by event series ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "event",
+            "in": "query",
+            "description": "Filter by event ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "description": "Filter by region",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "na", "north-america", "eu", "europe", "br", "brazil", "ap", "asia-pacific", "asia", "pacific", "kr", "korea", "ch", "china", "jp", "japan", "las", "la-s", "lan", "la-n", "oce", "oceania", "mena", "gc", "world"],
+              "default": "all"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "description": "Filter by country code",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minrounds",
+            "in": "query",
+            "description": "Minimum number of rounds played",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "minrating",
+            "in": "query",
+            "description": "Minimum rating",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "agent",
+            "in": "query",
+            "description": "Filter by agent name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "map",
+            "in": "query",
+            "description": "Filter by map name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timespan",
+            "in": "query",
+            "description": "Filter by time period",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "players": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Player"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/players/{id}": {
+      "get": {
+        "summary": "Get player by ID",
+        "description": "Retrieve detailed information about a specific player",
+        "tags": ["Players"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Player ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/teams": {
+      "get": {
+        "summary": "Get all teams",
+        "description": "Retrieve a list of all Valorant professional teams with optional filters",
+        "tags": ["Teams"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of teams per page",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "description": "Filter by region",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "na", "north-america", "eu", "europe", "br", "brazil", "ap", "asia-pacific", "asia", "pacific", "kr", "korea", "ch", "china", "jp", "japan", "las", "la-s", "lan", "la-n", "oce", "oceania", "mena", "gc", "world"],
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "teams": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Team"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/teams/{id}": {
+      "get": {
+        "summary": "Get team by ID",
+        "description": "Retrieve detailed information about a specific team",
+        "tags": ["Teams"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Team ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events": {
+      "get": {
+        "summary": "Get events",
+        "description": "Retrieve Valorant esports events with optional filters",
+        "tags": ["Events"],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by event status",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "upcoming", "ongoing", "completed"],
+              "default": "all"
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "description": "Filter by region",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "americas", "emea", "pacific", "china"],
+              "default": "all"
+            }
+          },
+          {
+            "name": "tier",
+            "in": "query",
+            "description": "Filter by tier",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "vct", "vcl", "t3", "game-changers", "collegiate", "offseason"],
+              "default": "all"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Event"
+                      }
+                    },
+                    "size": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/matches": {
+      "get": {
+        "summary": "Get upcoming matches",
+        "description": "Retrieve information about upcoming or live matches",
+        "tags": ["Matches"],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "matches": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Match"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/results": {
+      "get": {
+        "summary": "Get match results",
+        "description": "Retrieve information about past match results with pagination",
+        "tags": ["Results"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Match"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Player": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "team": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          }
+        }
+      },
+      "PlayerDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "realName": {
+            "type": "string"
+          },
+          "team": {
+            "type": "object"
+          },
+          "country": {
+            "type": "string"
+          },
+          "stats": {
+            "type": "object"
+          }
+        }
+      },
+      "Team": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          }
+        }
+      },
+      "TeamDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "roster": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Player"
+            }
+          }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "prizepool": {
+            "type": "string"
+          },
+          "dates": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "img": {
+            "type": "string"
+          }
+        }
+      },
+      "Match": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "team1": {
+            "type": "object"
+          },
+          "team2": {
+            "type": "object"
+          },
+          "score": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Players",
+      "description": "Operations related to Valorant players"
+    },
+    {
+      "name": "Teams",
+      "description": "Operations related to Valorant teams"
+    },
+    {
+      "name": "Events",
+      "description": "Operations related to Valorant esports events"
+    },
+    {
+      "name": "Matches",
+      "description": "Operations related to upcoming matches"
+    },
+    {
+      "name": "Results",
+      "description": "Operations related to match results"
+    }
+  ]
+}
