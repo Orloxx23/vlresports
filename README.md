@@ -18,6 +18,9 @@
     <img src="https://img.shields.io/github/issues/orloxx23/vlresports?style=for-the-badge" alt="GitHub issues" />
   </a>
   <img alt="Status" src="https://img.shields.io/website?url=https%3A%2F%2Fvlr.orlandomm.net%2F&style=for-the-badge&label=status"/>
+  <a href="https://github.com/Orloxx23/vlresports/actions/workflows/test.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Orloxx23/vlresports/test.yml?label=Tests&style=for-the-badge" alt="GitHub issues" />
+  </a>
 
 </p>
 
