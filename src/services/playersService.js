@@ -17,7 +17,9 @@ async function getPlayers(pagination, filters) {
     pagination.limit !== "all" ? pagination.page * pagination.limit : undefined;
 
   // Make a request to the specified URL and load the response body using Cheerio
-  const { data } = await axios.get(`https://www.vlr.gg/stats/?event_group_id=${filters.event_series}&event_id=${filters.event}&region=${filters.region}&country=${filters.country}&min_rounds=${filters.minrounds}&min_rating=${filters.minrating}&agent=${filters.agent}&map_id=${filters.map}&timespan=${filters.timespan}`);
+  const { data } = await axios.get(`https://www.vlr.gg/stats/?event_group_id=${filters.event_series}&event_id=${filters.event}&region=${filters.region}&country=${filters.country}&min_rounds=${filters.minrounds}&min_rating=${filters.minrating}&agent=${filters.agent}&map_id=${filters.map}&timespan=${filters.timespan}`, {
+    headers: { "Cookie": "abok=1" },
+  });
   const $ = cheerio.load(data);
 
   const players = [];
