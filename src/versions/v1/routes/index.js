@@ -4,7 +4,7 @@ const router = new Router();
 router.get("/", (req, res) => {
   const data = {
     contact: "orlandomm.net",
-    documentation: "vlresports.vercel.app",
+    documentation: "vlr.orlandomm.net/docs",
   };
   res.json(data);
 });
