@@ -2,27 +2,15 @@ const cheerio = require("cheerio");
 const { vlrgg_url, team_logo_placeholder } = require("../constants");
 const { vlrGet, normalizeTheme } = require("./vlrSession");
 
-const INDEX_TTL_MS = 60 * 60 * 1000;
-const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
-const FALLBACK_CONCURRENCY = 5;
-const INDEX_CONCURRENCY = 6;
+const INDEX_TTL_MS = 6 * 60 * 60 * 1000;
+const REFRESH_INTERVAL_MS = 3 * 60 * 60 * 1000;
+const FALLBACK_CONCURRENCY = 1;
+const INDEX_CONCURRENCY = 1;
 
-const REGIONS = [
-  "all",
-  "na",
-  "eu",
-  "br",
-  "kr",
-  "jp",
-  "ap",
-  "latam-n",
-  "latam-s",
-  "oce",
-  "mn",
-  "gc",
-  "cn",
-  "col",
-];
+// Keep this list short on purpose: every region adds 2 requests to vlr.gg
+// (one per theme). Stick to "all" (top of the global ranking) which already
+// covers ~50 unique teams. Fallback discovery from /matches fills in the rest.
+const REGIONS = ["all"];
 
 let teamsIndex = new Map();
 let teamsIndexExpiresAt = 0;
@@ -230,16 +218,21 @@ async function enrichMatchesWithTeamLogos(matches, theme) {
   return matches;
 }
 
-function startTeamsIndexRefresher({ intervalMs = REFRESH_INTERVAL_MS } = {}) {
+function startTeamsIndexRefresher({
+  intervalMs = REFRESH_INTERVAL_MS,
+  initialDelayMs = 90 * 1000,
+} = {}) {
   if (refreshTimer) return;
 
-  getTeamsIndex()
-    .then((index) => {
-      console.log(`[teamLogos] Warm-up loaded ${index.size} teams`);
-    })
-    .catch((err) => {
-      console.error("[teamLogos] Warm-up failed:", err.message);
-    });
+  setTimeout(() => {
+    getTeamsIndex()
+      .then((index) => {
+        console.log(`[teamLogos] Warm-up loaded ${index.size} teams`);
+      })
+      .catch((err) => {
+        console.error("[teamLogos] Warm-up failed:", err.message);
+      });
+  }, initialDelayMs).unref();
 
   refreshTimer = setInterval(() => {
     fetchTeamsIndex()

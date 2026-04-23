@@ -1,13 +1,16 @@
 const axios = require("axios");
 const { vlrgg_url } = require("../constants");
 
-const SESSION_TTL_MS = 60 * 60 * 1000;
-const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+const SESSION_TTL_MS = 6 * 60 * 60 * 1000;
+const REFRESH_INTERVAL_MS = 3 * 60 * 60 * 1000;
 const VALID_THEMES = new Set(["light", "dark"]);
 const DEFAULT_THEME = "light";
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 vlresports/1.0";
+
+const MIN_REQUEST_GAP_MS = 600;
+const REQUEST_TIMEOUT_MS = 20000;
 
 const sessions = {
   light: { cookie: null, expiresAt: 0 },
@@ -15,6 +18,54 @@ const sessions = {
 };
 const pendingInits = { light: null, dark: null };
 let refreshTimer = null;
+
+const requestQueue = [];
+let queueRunning = false;
+let lastRequestAt = 0;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function processQueue() {
+  if (queueRunning) return;
+  queueRunning = true;
+  try {
+    while (requestQueue.length > 0) {
+      const job = requestQueue.shift();
+      const wait = lastRequestAt + MIN_REQUEST_GAP_MS - Date.now();
+      if (wait > 0) await sleep(wait);
+      lastRequestAt = Date.now();
+      try {
+        const result = await job.fn();
+        job.resolve(result);
+      } catch (err) {
+        job.reject(err);
+      }
+    }
+  } finally {
+    queueRunning = false;
+  }
+}
+
+function enqueue(fn) {
+  return new Promise((resolve, reject) => {
+    requestQueue.push({ fn, resolve, reject });
+    processQueue();
+  });
+}
+
+function vlrAxiosGet(url, config) {
+  return enqueue(() =>
+    axios.get(url, { timeout: REQUEST_TIMEOUT_MS, ...config })
+  );
+}
+
+function vlrAxiosPost(url, body, config) {
+  return enqueue(() =>
+    axios.post(url, body, { timeout: REQUEST_TIMEOUT_MS, ...config })
+  );
+}
 
 function normalizeTheme(theme) {
   return VALID_THEMES.has(theme) ? theme : DEFAULT_THEME;
@@ -33,14 +84,14 @@ function extractPHPSessionId(setCookieHeaders) {
 }
 
 async function createSession(theme) {
-  const initRes = await axios.get(`${vlrgg_url}/`, {
+  const initRes = await vlrAxiosGet(`${vlrgg_url}/`, {
     headers: { "User-Agent": USER_AGENT },
   });
   const sid = extractPHPSessionId(initRes.headers["set-cookie"]);
   if (!sid) throw new Error("PHPSESSID not present in vlr.gg response");
 
   if (theme === "dark") {
-    await axios.post(
+    await vlrAxiosPost(
       `${vlrgg_url}/user/settings`,
       { key: "dark_mode", value: 1 },
       {
@@ -98,7 +149,7 @@ async function vlrGet(url, theme, axiosConfig = {}) {
   const t = normalizeTheme(theme);
   const cookie = await getSessionCookie(t);
 
-  const firstAttempt = await axios.get(url, {
+  const firstAttempt = await vlrAxiosGet(url, {
     ...axiosConfig,
     headers: mergeRequestHeaders(axiosConfig.headers, cookie),
   });
@@ -108,9 +159,9 @@ async function vlrGet(url, theme, axiosConfig = {}) {
     if (themeMatch && themeMatch[1] !== t) {
       invalidateSession(t);
       const fresh = await getSessionCookie(t);
-      return axios.get(url, {
+      return vlrAxiosGet(url, {
         ...axiosConfig,
-        headers: mergeCookieHeader(axiosConfig.headers, fresh),
+        headers: mergeRequestHeaders(axiosConfig.headers, fresh),
       });
     }
   }
@@ -118,16 +169,21 @@ async function vlrGet(url, theme, axiosConfig = {}) {
   return firstAttempt;
 }
 
-function startSessionRefresher({ intervalMs = REFRESH_INTERVAL_MS } = {}) {
+function startSessionRefresher({
+  intervalMs = REFRESH_INTERVAL_MS,
+  initialDelayMs = 60 * 1000,
+} = {}) {
   if (refreshTimer) return;
 
-  Promise.all([getSessionCookie("light"), getSessionCookie("dark")])
-    .then(() => {
-      console.log("[vlrSession] Warm-up loaded light + dark sessions");
-    })
-    .catch((err) => {
-      console.error("[vlrSession] Warm-up failed:", err.message);
-    });
+  setTimeout(() => {
+    Promise.all([getSessionCookie("light"), getSessionCookie("dark")])
+      .then(() => {
+        console.log("[vlrSession] Warm-up loaded light + dark sessions");
+      })
+      .catch((err) => {
+        console.error("[vlrSession] Warm-up failed:", err.message);
+      });
+  }, initialDelayMs).unref();
 
   refreshTimer = setInterval(() => {
     invalidateSession("light");
