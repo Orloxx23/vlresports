@@ -5,6 +5,7 @@ const morgan = require("morgan");
 let cors = require("cors");
 const openApiSpec = require("./openapi.json");
 const { startTeamsIndexRefresher } = require("./utils/teamLogos");
+const { startEventLogosRefresher } = require("./utils/eventLogos");
 const { startSessionRefresher } = require("./utils/vlrSession");
 
 const app = express();
@@ -51,4 +52,5 @@ app.listen(app.get("port"), () => {
   console.log(`API Documentation will be available at http://localhost:${app.get("port")}/docs`);
   startSessionRefresher();
   startTeamsIndexRefresher();
+  startEventLogosRefresher();
 });

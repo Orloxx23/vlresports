@@ -1,6 +1,7 @@
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 const { enrichMatchesWithTeamLogos } = require("../utils/teamLogos");
+const { applyEventLogosToMatches } = require("../utils/eventLogos");
 const { vlrGet } = require("../utils/vlrSession");
 
 async function getResults(page, theme) {
@@ -55,7 +56,10 @@ async function getResults(page, theme) {
     results.push(match);
   });
 
-  await enrichMatchesWithTeamLogos(results, theme);
+  await Promise.all([
+    enrichMatchesWithTeamLogos(results, theme),
+    applyEventLogosToMatches(results, theme),
+  ]);
 
   return {
     size: results.length,
