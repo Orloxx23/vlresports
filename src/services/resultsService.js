@@ -1,6 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
+const { enrichMatchesWithTeamLogos } = require("../utils/teamLogos");
 
 async function getResults(page) {
   const { data } = await axios.get(`${vlrgg_url}/matches/results?page=${page}`);
@@ -53,6 +54,8 @@ async function getResults(page) {
 
     results.push(match);
   });
+
+  await enrichMatchesWithTeamLogos(results);
 
   return {
     size: results.length,

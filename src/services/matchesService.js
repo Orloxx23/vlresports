@@ -1,6 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
+const { enrichMatchesWithTeamLogos } = require("../utils/teamLogos");
 
 /**
  * Retrieves and parses match data from the VLR website.
@@ -105,6 +106,8 @@ async function getMatches() {
       utc: newDate
     });
   });
+
+  await enrichMatchesWithTeamLogos(matches);
 
   // Return an object containing the number of matches and the matches array
   return {

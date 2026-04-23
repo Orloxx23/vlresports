@@ -1,6 +1,6 @@
 {
   "name": "vrlggscraper",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A simple API for Valorant Esports Scraper",
   "main": "src/index.js",
   "scripts": {

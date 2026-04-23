@@ -2,6 +2,7 @@ const express = require("express");
 const morgan = require("morgan");
 let cors = require("cors");
 const openApiSpec = require("./openapi.json");
+const { startTeamsIndexRefresher } = require("./utils/teamLogos");
 
 const app = express();
 
@@ -45,4 +46,5 @@ app.use("/api/v1/results", require("./versions/v1/routes/results"));
 app.listen(app.get("port"), () => {
   console.log(`Server running on port ${app.get("port")}`);
   console.log(`API Documentation will be available at http://localhost:${app.get("port")}/docs`);
+  startTeamsIndexRefresher();
 });
