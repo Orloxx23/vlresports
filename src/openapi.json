@@ -117,7 +117,8 @@
             "schema": {
               "type": "string"
             }
-          }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
         ],
         "responses": {
           "200": {
@@ -155,7 +156,8 @@
             "schema": {
               "type": "string"
             }
-          }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
         ],
         "responses": {
           "200": {
@@ -204,7 +206,8 @@
               "enum": ["all", "na", "north-america", "eu", "europe", "br", "brazil", "ap", "asia-pacific", "asia", "pacific", "kr", "korea", "ch", "china", "jp", "japan", "las", "la-s", "lan", "la-n", "oce", "oceania", "mena", "gc", "world"],
               "default": "all"
             }
-          }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
         ],
         "responses": {
           "200": {
@@ -242,7 +245,8 @@
             "schema": {
               "type": "string"
             }
-          }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
         ],
         "responses": {
           "200": {
@@ -302,7 +306,8 @@
               "type": "integer",
               "default": 1
             }
-          }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
         ],
         "responses": {
           "200": {
@@ -334,6 +339,9 @@
         "summary": "Get upcoming matches",
         "description": "Retrieve information about upcoming or live matches",
         "tags": ["Matches"],
+        "parameters": [
+          { "$ref": "#/components/parameters/ThemeParam" }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",
@@ -370,7 +378,8 @@
               "type": "integer",
               "default": 1
             }
-          }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
         ],
         "responses": {
           "200": {
@@ -396,6 +405,18 @@
     }
   },
   "components": {
+    "parameters": {
+      "ThemeParam": {
+        "name": "theme",
+        "in": "query",
+        "description": "Selects the vlr.gg theme variant used when extracting logos. Some events and teams serve a different logo image for light vs dark mode (e.g. VCT EMEA is black on light, green on dark). Defaults to `light` for backwards compatibility.",
+        "schema": {
+          "type": "string",
+          "enum": ["light", "dark"],
+          "default": "light"
+        }
+      }
+    },
     "schemas": {
       "Player": {
         "type": "object",

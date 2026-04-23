@@ -1,6 +1,6 @@
-const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
+const { vlrGet } = require("../utils/vlrSession");
 
 /**
  * Retrieves player information from the VLR website based on pagination and filters.
@@ -10,16 +10,18 @@ const { vlrgg_url } = require("../constants");
  * @param {Object} filters - Filters to apply to the request.
  * @returns {Object} - Player information and pagination details.
  */
-async function getPlayers(pagination, filters) {
+async function getPlayers(pagination, filters, theme) {
   const startIndex =
     pagination.limit !== "all" ? (pagination.page - 1) * pagination.limit : 0;
   const endIndex =
     pagination.limit !== "all" ? pagination.page * pagination.limit : undefined;
 
   // Make a request to the specified URL and load the response body using Cheerio
-  const { data } = await axios.get(`https://www.vlr.gg/stats/?event_group_id=${filters.event_series}&event_id=${filters.event}&region=${filters.region}&country=${filters.country}&min_rounds=${filters.minrounds}&min_rating=${filters.minrating}&agent=${filters.agent}&map_id=${filters.map}&timespan=${filters.timespan}`, {
-    headers: { "Cookie": "abok=1" },
-  });
+  const { data } = await vlrGet(
+    `https://www.vlr.gg/stats/?event_group_id=${filters.event_series}&event_id=${filters.event}&region=${filters.region}&country=${filters.country}&min_rounds=${filters.minrounds}&min_rating=${filters.minrating}&agent=${filters.agent}&map_id=${filters.map}&timespan=${filters.timespan}`,
+    theme,
+    { headers: { Cookie: "abok=1" } }
+  );
   const $ = cheerio.load(data);
 
   const players = [];
@@ -84,12 +86,12 @@ async function getPlayers(pagination, filters) {
  * @param {string} id - The player's unique ID.
  * @returns {object} An object containing player info, team info, and socials.
  */
-async function getPlayerById(id) {
-  // Send a request to get the HTML content of the player's profile page
-  const { data } = await axios.get(`${vlrgg_url}/player/${id}`);
-  const $ = cheerio.load(data);
-
-  const matchesResponse = await axios.get(`${vlrgg_url}/player/matches/${id}/?group=completed`);
+async function getPlayerById(id, theme) {
+  const [playerRes, matchesResponse] = await Promise.all([
+    vlrGet(`${vlrgg_url}/player/${id}`, theme),
+    vlrGet(`${vlrgg_url}/player/matches/${id}/?group=completed`, theme),
+  ]);
+  const $ = cheerio.load(playerRes.data);
   const $matches = cheerio.load(matchesResponse.data);
 
   // Extract player information

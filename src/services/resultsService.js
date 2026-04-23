@@ -1,10 +1,10 @@
-const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 const { enrichMatchesWithTeamLogos } = require("../utils/teamLogos");
+const { vlrGet } = require("../utils/vlrSession");
 
-async function getResults(page) {
-  const { data } = await axios.get(`${vlrgg_url}/matches/results?page=${page}`);
+async function getResults(page, theme) {
+  const { data } = await vlrGet(`${vlrgg_url}/matches/results?page=${page}`, theme);
   const $ = cheerio.load(data);
 
   const results = [];
@@ -55,7 +55,7 @@ async function getResults(page) {
     results.push(match);
   });
 
-  await enrichMatchesWithTeamLogos(results);
+  await enrichMatchesWithTeamLogos(results, theme);
 
   return {
     size: results.length,

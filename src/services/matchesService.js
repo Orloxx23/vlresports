@@ -1,15 +1,15 @@
-const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 const { enrichMatchesWithTeamLogos } = require("../utils/teamLogos");
+const { vlrGet } = require("../utils/vlrSession");
 
 /**
  * Retrieves and parses match data from the VLR website.
  * @returns {Object} An object containing match details including team names, countries, match status, event name, tournament name, match image URL, and match ETA.
  */
-async function getMatches() {
+async function getMatches(theme) {
   // Send a request to the specified URL and parse the HTML response using cheerio
-  const { data } = await axios.get(`${vlrgg_url}/matches`);
+  const { data } = await vlrGet(`${vlrgg_url}/matches`, theme);
   const $ = cheerio.load(data);
 
   // Array to store match objects
@@ -107,7 +107,7 @@ async function getMatches() {
     });
   });
 
-  await enrichMatchesWithTeamLogos(matches);
+  await enrichMatchesWithTeamLogos(matches, theme);
 
   // Return an object containing the number of matches and the matches array
   return {

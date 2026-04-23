@@ -1,5 +1,6 @@
 const playersService = require("../services/playersService");
 const catchError = require("../utils/catchError");
+const { normalizeTheme } = require("../utils/vlrSession");
 
 const getPlayers = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -31,11 +32,13 @@ const getPlayers = async (req, res) => {
     timespan,
   };
 
+  const theme = normalizeTheme(req.query.theme);
+
   try {
     const {
       players,
       pagination: { totalElements, totalPages, hasNextPage },
-    } = await playersService.getPlayers(pagination, filters);
+    } = await playersService.getPlayers(pagination, filters, theme);
     res.json({
       status: "OK",
       size: players.length,
@@ -55,8 +58,9 @@ const getPlayers = async (req, res) => {
 
 const getPlayerById = async (req, res) => {
   const { id } = req.params;
+  const theme = normalizeTheme(req.query.theme);
   try {
-    const player = await playersService.getPlayerById(id);
+    const player = await playersService.getPlayerById(id, theme);
     res.json({
       status: "OK",
       data: player,

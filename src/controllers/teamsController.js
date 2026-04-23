@@ -1,5 +1,6 @@
 const teamsService = require("../services/teamsService");
 const catchError = require("../utils/catchError");
+const { normalizeTheme } = require("../utils/vlrSession");
 
 const getTeams = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -105,11 +106,13 @@ const getTeams = async (req, res) => {
       region = regionQuery;
   }
 
+  const theme = normalizeTheme(req.query.theme);
+
   try {
     const {
       teams,
       pagination: { totalElements, totalPages, hasNextPage },
-    } = await teamsService.getTeams(pagination, region);
+    } = await teamsService.getTeams(pagination, region, theme);
 
     res.status(200).json({
       status: "OK",
@@ -131,8 +134,9 @@ const getTeams = async (req, res) => {
 
 const getTeamById = async (req, res) => {
   const { id } = req.params;
+  const theme = normalizeTheme(req.query.theme);
   try {
-    const team = await teamsService.getTeamById(id);
+    const team = await teamsService.getTeamById(id, theme);
     res.status(200).json({
       status: "OK",
       data: team,

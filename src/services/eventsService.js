@@ -1,6 +1,6 @@
-const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
+const { vlrGet } = require("../utils/vlrSession");
 
 const TIER_MAP = {
   vct: "60",
@@ -28,10 +28,13 @@ const REGION_MAP = {
  * @param {number} page - The page number of the events to retrieve (default is 1).
  * @returns {Object} An object containing event details including event name, status, prize pool, dates, region, and event image URL.
  */
-async function getEvents(status, region, tier, page) {
+async function getEvents(status, region, tier, page, theme) {
   const regionParam = REGION_MAP[region] || region;
   const tierParam = tier ? `&tier=${TIER_MAP[tier] || tier}` : "";
-  const { data } = await axios.get(`${vlrgg_url}/events/?region=${regionParam}&page=${page}${tierParam}`);
+  const { data } = await vlrGet(
+    `${vlrgg_url}/events/?region=${regionParam}&page=${page}${tierParam}`,
+    theme
+  );
   const $ = cheerio.load(data);
 
   // Array to store event objects

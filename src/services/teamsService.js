@@ -1,6 +1,6 @@
-const axios = require("axios");
 const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
+const { vlrGet } = require("../utils/vlrSession");
 
 /**
  * Fetches teams' information from the given region with pagination.
@@ -10,7 +10,7 @@ const { vlrgg_url } = require("../constants");
  * @param {string} region - The region from which to fetch the teams' information.
  * @returns {object} An object containing teams' information and pagination details.
  */
-async function getTeams(pagination, region) {
+async function getTeams(pagination, region, theme) {
   // Calculate the start and end indices based on pagination
   const startIndex =
     pagination.limit !== "all" ? (pagination.page - 1) * pagination.limit : 0;
@@ -18,7 +18,7 @@ async function getTeams(pagination, region) {
     pagination.limit !== "all" ? pagination.page * pagination.limit : undefined;
 
   // Send a request to get the HTML content of the rankings page for the specified region
-  const { data } = await axios.get(`${vlrgg_url}/rankings/${region}`);
+  const { data } = await vlrGet(`${vlrgg_url}/rankings/${region}`, theme);
   const $ = cheerio.load(data);
 
   const teams = [];
@@ -122,11 +122,12 @@ async function getTeams(pagination, region) {
  * @param {string} id - Team ID.
  * @returns {Object} - Team information.
  */
-async function getTeamById(id) {
-  const { data } = await axios.get(`${vlrgg_url}/team/${id}`);
-  const $ = cheerio.load(data);
-
-  const matchesResponse = await axios.get(`${vlrgg_url}/team/matches/${id}/?group=completed`);
+async function getTeamById(id, theme) {
+  const [teamRes, matchesResponse] = await Promise.all([
+    vlrGet(`${vlrgg_url}/team/${id}`, theme),
+    vlrGet(`${vlrgg_url}/team/matches/${id}/?group=completed`, theme),
+  ]);
+  const $ = cheerio.load(teamRes.data);
   const $matches = cheerio.load(matchesResponse.data);
 
   let roster = [];

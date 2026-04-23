@@ -1,5 +1,6 @@
 const eventsService = require("../services/eventsService");
 const catchError = require("../utils/catchError");
+const { normalizeTheme } = require("../utils/vlrSession");
 
 const getEvents = async (req, res) => {
   const status = req.query.status || "all";
@@ -7,13 +8,15 @@ const getEvents = async (req, res) => {
   const tier = req.query.tier || null;
 
   const region = req.query.region || "all";
+  const theme = normalizeTheme(req.query.theme);
 
   try {
     const { size, events } = await eventsService.getEvents(
       status,
       region,
       tier,
-      page
+      page,
+      theme
     );
 
     res.status(200).json({
