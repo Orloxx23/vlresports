@@ -1,5 +1,17 @@
 const Sentry = require("./instrument");
 
+// Process-level guards: report to GlitchTip and keep the service alive
+// instead of letting Node kill the process.
+process.on("unhandledRejection", (reason) => {
+  console.error("[fatal] Unhandled rejection:", reason);
+  Sentry.captureException(reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("[fatal] Uncaught exception:", err);
+  Sentry.captureException(err);
+});
+
 const express = require("express");
 const morgan = require("morgan");
 let cors = require("cors");
@@ -48,6 +60,18 @@ app.use("/api/v1/results", require("./versions/v1/routes/results"));
 
 // GlitchTip: report unhandled route errors
 Sentry.setupExpressErrorHandler(app);
+
+// Final error handler: always answer with JSON instead of crashing the request
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  res.status(err.statusCode || 500).json({
+    status: "error",
+    message: {
+      error: err.statusCode || 500,
+      message: "Internal server error",
+    },
+  });
+});
 
 // Starting server
 app.listen(app.get("port"), () => {
