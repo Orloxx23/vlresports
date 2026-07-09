@@ -1,6 +1,12 @@
+const Sentry = require("@sentry/node");
+
 const catchError = (res, error) => {
   const code = error.statusCode || 500;
   let errorMessage;
+
+  if (code >= 500) {
+    Sentry.captureException(error);
+  }
 
   switch (code) {
     case 400:

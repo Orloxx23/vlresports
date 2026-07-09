@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@scalar/express-api-reference": "^0.8.22",
+    "@sentry/node": "^10.64.0",
     "axios": "^1.12.2",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
