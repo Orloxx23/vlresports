@@ -24,7 +24,9 @@ const getEvents = async (req, res) => {
       size,
       data: events,
     });
-  } catch (error) {}
+  } catch (error) {
+    catchError(res, error);
+  }
 };
 
 // To do: Add getEventById

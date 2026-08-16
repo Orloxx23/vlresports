@@ -13,7 +13,9 @@ const getResults = async (req, res) => {
       size,
       data: results,
     });
-  } catch (error) {}
+  } catch (error) {
+    catchError(res, error);
+  }
 };
 
 module.exports = {

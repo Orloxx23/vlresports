@@ -14,6 +14,13 @@ const DARK_MODE_COOKIE = 'settings=%7B%22dark_mode%22%3A1%7D';
 const MIN_REQUEST_GAP_MS = 600;
 const REQUEST_TIMEOUT_MS = 20000;
 
+// Upper bound on how many scraper jobs may sit in the shared queue at once.
+// Because a single worker drains the queue with a MIN_REQUEST_GAP_MS gap, an
+// unbounded queue lets any client serialize the whole service behind their
+// jobs (CWE-770). Rejecting once the queue is full caps both the added latency
+// (MAX_QUEUE_LENGTH * MIN_REQUEST_GAP_MS) and memory growth.
+const MAX_QUEUE_LENGTH = Number(process.env.VLR_MAX_QUEUE_LENGTH) || 50;
+
 const PROXY_URL = process.env.VLR_PROXY_URL || "";
 const PROXY_TOKEN = process.env.VLR_PROXY_TOKEN || "";
 const PROXY_ENABLED = Boolean(PROXY_URL && PROXY_TOKEN);
@@ -50,6 +57,12 @@ async function processQueue() {
 
 function enqueue(fn) {
   return new Promise((resolve, reject) => {
+    if (requestQueue.length >= MAX_QUEUE_LENGTH) {
+      const err = new Error("Scraper queue is full, try again later");
+      err.statusCode = 503;
+      reject(err);
+      return;
+    }
     requestQueue.push({ fn, resolve, reject });
     processQueue();
   });

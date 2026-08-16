@@ -14,6 +14,7 @@ process.on("uncaughtException", (err) => {
 
 const express = require("express");
 const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
 let cors = require("cors");
 const openApiSpec = require("./openapi.json");
 const { startTeamsIndexRefresher } = require("./utils/teamLogos");
@@ -24,6 +25,13 @@ const app = express();
 
 // Settings
 app.set("port", process.env.PORT || 5000);
+
+// When deployed behind a reverse proxy, trust it so rate limiting keys off the
+// real client IP instead of the proxy's. Left off by default: enabling it
+// without a proxy would let clients spoof X-Forwarded-For to dodge the limiter.
+if (process.env.TRUST_PROXY) {
+  app.set("trust proxy", process.env.TRUST_PROXY);
+}
 
 // Middlewares
 app.use(cors());
@@ -48,15 +56,33 @@ import("@scalar/express-api-reference").then(({ apiReference }) => {
   console.error("Failed to load API documentation:", err.message);
 });
 
+// Per-client admission control for the scraper-backed API. Every one of these
+// routes funnels into a single, rate-limited request queue (see vlrSession.js),
+// so without this a single unauthenticated client can flood the shared queue
+// and degrade availability for everyone (CWE-770).
+const apiLimiter = rateLimit({
+  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_MAX) || 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: "error",
+    message: {
+      error: 429,
+      message: "Too many requests",
+    },
+  },
+});
+
 // Routes
 app.use(require("./versions/v1/routes/index"));
 app.use("/api", require("./versions/v1/routes/index"));
 // - Version 1
-app.use("/api/v1/teams", require("./versions/v1/routes/teams"));
-app.use("/api/v1/players", require("./versions/v1/routes/players"));
-app.use("/api/v1/events", require("./versions/v1/routes/events"));
-app.use("/api/v1/matches", require("./versions/v1/routes/matches"));
-app.use("/api/v1/results", require("./versions/v1/routes/results"));
+app.use("/api/v1/teams", apiLimiter, require("./versions/v1/routes/teams"));
+app.use("/api/v1/players", apiLimiter, require("./versions/v1/routes/players"));
+app.use("/api/v1/events", apiLimiter, require("./versions/v1/routes/events"));
+app.use("/api/v1/matches", apiLimiter, require("./versions/v1/routes/matches"));
+app.use("/api/v1/results", apiLimiter, require("./versions/v1/routes/results"));
 
 // GlitchTip: report unhandled route errors
 Sentry.setupExpressErrorHandler(app);

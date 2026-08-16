@@ -12,7 +12,9 @@ const getMatches = async (req, res) => {
       size,
       data: matches,
     });
-  } catch (error) {}
+  } catch (error) {
+    catchError(res, error);
+  }
 };
 
 module.exports = {
