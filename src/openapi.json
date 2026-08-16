@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "vlresports - Valorant Esports API",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "description": "API for scraping Valorant esports data from vlr.gg\n\n**Important:** All IDs (players, teams, events, matches) used in this API correspond to the IDs from vlr.gg. You can find these IDs in the URLs on the vlr.gg website.",
     "license": {
       "name": "Apache 2.0",
@@ -15,7 +15,7 @@
   },
   "servers": [
     {
-      "url": "https://vlr.orlandomm.net",
+      "url": "http://localhost:5000",
       "description": "Production server"
     }
   ],
@@ -364,6 +364,60 @@
         }
       }
     },
+    "/api/v1/matches/{id}": {
+      "get": {
+        "summary": "Get match by ID",
+        "description": "Retrieve full details of a single match: event info, teams, score, status, streams, VODs, picks/bans, per-map results and per-player statistics (overall and per map). Optionally include the performance tab (multikills, clutches, duel matrices) and/or economy tab (buy types, banks, round economy) via the `tabs` query parameter.",
+        "tags": ["Matches"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Match ID (numeric, from the vlr.gg match URL)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tabs",
+            "in": "query",
+            "description": "Comma-separated extra vlr.gg tabs to scrape: `performance`, `economy`, or `all` for both. Each tab adds one extra request to vlr.gg, making the response slower. The data appears at the top level (aggregated across all maps) and inside each map object.",
+            "schema": {
+              "type": "string",
+              "example": "performance,economy"
+            }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MatchDetail"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid match id (must be numeric)"
+          },
+          "404": {
+            "description": "Match not found"
+          }
+        }
+      }
+    },
     "/api/v1/results": {
       "get": {
         "summary": "Get match results",
@@ -521,6 +575,379 @@
           },
           "img": {
             "type": "string"
+          }
+        }
+      },
+      "MatchDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "event": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "url": { "type": "string" },
+              "name": { "type": "string" },
+              "series": { "type": "string" },
+              "img": { "type": "string" }
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "Match status: `upcoming`, `live` or `final`"
+          },
+          "in": {
+            "type": "string",
+            "nullable": true,
+            "description": "Countdown until match start (only for upcoming matches, e.g. `2d 8h`)"
+          },
+          "format": {
+            "type": "string",
+            "description": "Match format, e.g. `Bo3`"
+          },
+          "date": { "type": "string" },
+          "time": { "type": "string" },
+          "timestamp": {
+            "type": "integer",
+            "description": "Unix timestamp (seconds, UTC) of the match start"
+          },
+          "utcDate": { "type": "string" },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "url": { "type": "string" },
+                "name": { "type": "string" },
+                "img": { "type": "string" },
+                "score": { "type": "integer", "nullable": true }
+              }
+            }
+          },
+          "streams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "link": { "type": "string" }
+              }
+            }
+          },
+          "vods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "link": { "type": "string" }
+              }
+            }
+          },
+          "picksBans": {
+            "type": "object",
+            "properties": {
+              "note": { "type": "string", "nullable": true },
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "team": { "type": "string", "nullable": true },
+                    "action": {
+                      "type": "string",
+                      "description": "`ban`, `pick`, `remains` or `note`"
+                    },
+                    "map": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "maps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "status": {
+                  "type": "string",
+                  "description": "`played`, `live` or `upcoming`"
+                },
+                "pickedBy": { "type": "string", "nullable": true },
+                "duration": { "type": "string", "nullable": true },
+                "teams": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "score": { "type": "integer", "nullable": true },
+                      "roundsCt": { "type": "integer", "nullable": true },
+                      "roundsT": { "type": "integer", "nullable": true }
+                    }
+                  }
+                },
+                "rounds": {
+                  "type": "array",
+                  "description": "Round-by-round timeline of the map",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "number": { "type": "integer" },
+                      "score": {
+                        "type": "string",
+                        "description": "Running score after the round, e.g. `5-3`"
+                      },
+                      "winner": {
+                        "type": "string",
+                        "description": "Tag of the team that won the round"
+                      },
+                      "side": {
+                        "type": "string",
+                        "description": "Side the round was won on: `t` or `ct`"
+                      },
+                      "method": {
+                        "type": "string",
+                        "description": "How the round was won: `elim` (eliminations), `boom` (spike exploded), `defuse` (spike defused) or `time` (time ran out)"
+                      },
+                      "methodIcon": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Absolute URL of the win-method icon shown on vlr.gg"
+                      }
+                    }
+                  }
+                },
+                "players": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MatchPlayerStats"
+                  }
+                },
+                "performance": {
+                  "$ref": "#/components/schemas/MatchPerformance",
+                  "description": "Only present when `tabs` includes `performance`"
+                },
+                "economy": {
+                  "$ref": "#/components/schemas/MatchEconomy",
+                  "description": "Only present when `tabs` includes `economy`"
+                }
+              }
+            }
+          },
+          "players": {
+            "type": "array",
+            "description": "Per-player statistics aggregated across all maps",
+            "items": {
+              "$ref": "#/components/schemas/MatchPlayerStats"
+            }
+          },
+          "performance": {
+            "$ref": "#/components/schemas/MatchPerformance",
+            "description": "Aggregated across all maps. Only present when `tabs` includes `performance`"
+          },
+          "economy": {
+            "$ref": "#/components/schemas/MatchEconomy",
+            "description": "Aggregated across all maps (summary only, no rounds). Only present when `tabs` includes `economy`"
+          }
+        }
+      },
+      "MatchPerformance": {
+        "type": "object",
+        "properties": {
+          "players": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "teamTag": { "type": "string" },
+                "agents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "img": { "type": "string" }
+                    }
+                  }
+                },
+                "multikills": {
+                  "type": "object",
+                  "properties": {
+                    "2k": { "type": "integer" },
+                    "3k": { "type": "integer" },
+                    "4k": { "type": "integer" },
+                    "5k": { "type": "integer" }
+                  }
+                },
+                "clutches": {
+                  "type": "object",
+                  "properties": {
+                    "1v1": { "type": "integer" },
+                    "1v2": { "type": "integer" },
+                    "1v3": { "type": "integer" },
+                    "1v4": { "type": "integer" },
+                    "1v5": { "type": "integer" }
+                  }
+                },
+                "econ": { "type": "integer" },
+                "plants": { "type": "integer" },
+                "defuses": { "type": "integer" }
+              }
+            }
+          },
+          "killMatrix": {
+            "type": "array",
+            "description": "Head-to-head kills between each player pair",
+            "items": { "$ref": "#/components/schemas/DuelMatrixRow" }
+          },
+          "opKillMatrix": {
+            "type": "array",
+            "description": "Head-to-head Operator kills between each player pair",
+            "items": { "$ref": "#/components/schemas/DuelMatrixRow" }
+          },
+          "firstKillMatrix": {
+            "type": "array",
+            "description": "Head-to-head first kills/first deaths between each player pair",
+            "items": { "$ref": "#/components/schemas/DuelMatrixRow" }
+          }
+        }
+      },
+      "DuelMatrixRow": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "teamTag": { "type": "string" },
+          "records": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "teamTag": { "type": "string" },
+                "kills": { "type": "integer" },
+                "deaths": { "type": "integer" },
+                "diff": { "type": "integer" }
+              }
+            }
+          }
+        }
+      },
+      "MatchEconomy": {
+        "type": "object",
+        "properties": {
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "pistolWon": { "type": "integer" },
+                "eco": { "$ref": "#/components/schemas/EconomyBuyStat" },
+                "semiEco": { "$ref": "#/components/schemas/EconomyBuyStat" },
+                "semiBuy": { "$ref": "#/components/schemas/EconomyBuyStat" },
+                "fullBuy": { "$ref": "#/components/schemas/EconomyBuyStat" }
+              }
+            }
+          },
+          "rounds": {
+            "type": "array",
+            "description": "Round-by-round economy (only for played maps, empty at the aggregated level)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "number": { "type": "integer" },
+                "teams": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "bank": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "Team bank at round start, in credits"
+                      },
+                      "loadout": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "Total loadout value of the team that round, in credits"
+                      },
+                      "buy": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Buy type: `eco` (0-5k), `semi-eco` (5-10k), `semi-buy` (10-20k) or `full-buy` (20k+)"
+                      },
+                      "winner": {
+                        "type": "boolean",
+                        "description": "Whether this team won the round"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "EconomyBuyStat": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "Rounds played with this buy type"
+          },
+          "won": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Rounds won with this buy type"
+          }
+        }
+      },
+      "MatchPlayerStats": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "url": { "type": "string" },
+          "name": { "type": "string" },
+          "teamTag": { "type": "string" },
+          "country": { "type": "string" },
+          "flag": { "type": "string" },
+          "agents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "img": {
+                  "type": "string",
+                  "description": "Absolute URL of the agent icon"
+                }
+              }
+            }
+          },
+          "stats": {
+            "type": "object",
+            "properties": {
+              "rating": { "type": "number", "nullable": true },
+              "acs": { "type": "number", "nullable": true },
+              "kills": { "type": "integer", "nullable": true },
+              "deaths": { "type": "integer", "nullable": true },
+              "assists": { "type": "integer", "nullable": true },
+              "kast": { "type": "number", "nullable": true },
+              "adr": { "type": "number", "nullable": true },
+              "hs": { "type": "number", "nullable": true },
+              "firstBloods": { "type": "integer", "nullable": true },
+              "firstDeaths": { "type": "integer", "nullable": true }
+            }
           }
         }
       },

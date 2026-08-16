@@ -101,6 +101,9 @@ The following are the main endpoints provided by the API:
 - `GET /api/v1/teams/{team_id}`: Retrieve information about a specific team.
 - `GET /api/v1/events`: Retrieve information about all events.
 - `GET /api/v1/matches`: Retrieve information about upcoming matches or matches being played.
+- `GET /api/v1/matches/{match_id}`: Retrieve full details of a match (teams, score, picks/bans, per-map results and player stats).
+  - Rounds timeline per map: winner, side and win method (`elim`, `boom`, `defuse`, `time`) with its icon URL.
+  - Optional query param `?tabs=performance,economy` (or `?tabs=all`) to include the vlr.gg Performance tab (multikills, clutches, duel matrices) and Economy tab (buy types, banks, round-by-round economy), both aggregated and per map. Each tab adds one extra request to vlr.gg, so only ask for what you need.
 - `GET /api/v1/results`: Retrieve information about past match results.
 
 ## 🤝 Contributing
