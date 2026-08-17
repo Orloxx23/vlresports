@@ -15,7 +15,7 @@
   },
   "servers": [
     {
-      "url": "http://vlr.orlandomm.net",
+      "url": "https://vlr.orlandomm.net",
       "description": "Production server"
     }
   ],
@@ -145,7 +145,7 @@
     "/api/v1/players/{id}": {
       "get": {
         "summary": "Get player by ID",
-        "description": "Retrieve detailed information about a specific player",
+        "description": "Retrieve detailed information about a specific player: profile, current team, recent results, past teams, socials and per-agent statistics as shown on their vlr.gg page.",
         "tags": ["Players"],
         "parameters": [
           {
@@ -155,6 +155,16 @@
             "description": "Player ID",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "timespan",
+            "in": "query",
+            "description": "Time window for the per-agent statistics",
+            "schema": {
+              "type": "string",
+              "enum": ["30d", "60d", "90d", "all"],
+              "default": "60d"
             }
           },
           { "$ref": "#/components/parameters/ThemeParam" }
@@ -698,23 +708,57 @@
       "PlayerDetail": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "realName": {
-            "type": "string"
+          "info": {
+            "type": "object",
+            "description": "Player profile: id, url, img, user, name, country, flag"
           },
           "team": {
-            "type": "object"
+            "type": "object",
+            "description": "Current team: id, url, name, logo, joined"
           },
-          "country": {
-            "type": "string"
+          "results": {
+            "type": "array",
+            "description": "Latest completed matches",
+            "items": { "type": "object" }
           },
-          "stats": {
-            "type": "object"
+          "pastTeams": {
+            "type": "array",
+            "items": { "type": "object" }
+          },
+          "socials": {
+            "type": "object",
+            "description": "Twitter and Twitch handles and URLs"
+          },
+          "timespan": {
+            "type": "string",
+            "description": "Time window the agent statistics cover: `30d`, `60d`, `90d` or `all`"
+          },
+          "agents": {
+            "type": "array",
+            "description": "Per-agent statistics from the player's page",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "img": { "type": "string" },
+                "mapsPlayed": { "type": "integer", "nullable": true },
+                "pickRate": { "type": "number", "nullable": true, "description": "Percentage" },
+                "rounds": { "type": "integer", "nullable": true },
+                "rating": { "type": "number", "nullable": true },
+                "acs": { "type": "number", "nullable": true },
+                "kd": { "type": "number", "nullable": true },
+                "kast": { "type": "number", "nullable": true, "description": "Percentage" },
+                "adr": { "type": "number", "nullable": true },
+                "kpr": { "type": "number", "nullable": true },
+                "apr": { "type": "number", "nullable": true },
+                "fkfd": { "type": "number", "nullable": true, "description": "First kills : first deaths ratio" },
+                "kills": { "type": "integer", "nullable": true },
+                "deaths": { "type": "integer", "nullable": true },
+                "assists": { "type": "integer", "nullable": true },
+                "firstKills": { "type": "integer", "nullable": true },
+                "firstDeaths": { "type": "integer", "nullable": true }
+              }
+            }
           }
         }
       },

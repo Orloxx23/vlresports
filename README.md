@@ -96,7 +96,7 @@ Please refer to the <a href="https://vlr.orlandomm.net/docs">API documentation</
 The following are the main endpoints provided by the API:
 
 - `GET /api/v1/players`: Retrieve information about all players.
-- `GET /api/v1/players/{player_id}`: Retrieve information about a specific player.
+- `GET /api/v1/players/{player_id}`: Retrieve information about a specific player. Includes per-agent statistics; use `?timespan=30d|60d|90d|all` to change the window (default 60d).
 - `GET /api/v1/teams`: Retrieve information about all teams.
 - `GET /api/v1/teams/{team_id}`: Retrieve information about a specific team.
 - `GET /api/v1/events`: Retrieve information about all events.

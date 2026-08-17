@@ -82,13 +82,85 @@ async function getPlayers(pagination, filters, theme) {
 }
 
 /**
+ * Converts a relative or protocol-relative image URL to an absolute URL.
+ * @param {string} src - The image source attribute.
+ * @returns {string|null} The absolute URL or null if missing.
+ */
+function toAbsoluteUrl(src) {
+  if (!src) return null;
+  if (src.startsWith("//")) return "https:" + src;
+  if (src.startsWith("/")) return vlrgg_url + src;
+  return src;
+}
+
+const PLAYER_TIMESPANS = ["30d", "60d", "90d", "all"];
+
+/**
+ * Parses the agent statistics table shown on a player's page.
+ * @param {Object} $ - Cheerio instance of the player page.
+ * @returns {Array<Object>} Per-agent statistics.
+ */
+function parsePlayerAgents($) {
+  const agents = [];
+
+  $("#st-table tbody tr").each((i, tr) => {
+    const tds = $(tr).find("td");
+    const src = tds.eq(0).find("img").attr("src") || "";
+
+    // Usage cell looks like "(10) 36%": maps played and pick rate
+    const usageMatch = tds
+      .eq(1)
+      .text()
+      .replace(/\s+/g, " ")
+      .trim()
+      .match(/\((\d+)\)\s*(\d+)%/);
+
+    const num = (idx) => {
+      const text = tds.eq(idx).text().replace(/[%\s]+/g, "").trim();
+      if (text === "" || text === "-") return null;
+      const value = Number(text);
+      return Number.isNaN(value) ? null : value;
+    };
+
+    agents.push({
+      name: (src.split("/").pop() || "").split(".")[0] || null,
+      img: toAbsoluteUrl(src),
+      mapsPlayed: usageMatch ? Number(usageMatch[1]) : null,
+      pickRate: usageMatch ? Number(usageMatch[2]) : null,
+      rounds: num(2),
+      rating: num(3),
+      acs: num(4),
+      kd: num(5),
+      kast: num(6),
+      adr: num(7),
+      kpr: num(8),
+      apr: num(9),
+      fkfd: num(10),
+      kills: num(11),
+      deaths: num(12),
+      assists: num(13),
+      firstKills: num(14),
+      firstDeaths: num(15),
+    });
+  });
+
+  return agents;
+}
+
+/**
  * Fetches player information by player ID using web scraping.
  * @param {string} id - The player's unique ID.
- * @returns {object} An object containing player info, team info, and socials.
+ * @param {string} theme - The vlr.gg theme variant.
+ * @param {string} [timespan] - Agent stats window: "30d", "60d", "90d" or "all"
+ *   (vlr.gg defaults to 60d).
+ * @returns {object} An object containing player info, team info, agent stats and socials.
  */
-async function getPlayerById(id, theme) {
+async function getPlayerById(id, theme, timespan) {
+  const playerUrl = timespan
+    ? `${vlrgg_url}/player/${id}/?timespan=${timespan}`
+    : `${vlrgg_url}/player/${id}`;
   const [playerRes, matchesResponse] = await Promise.all([
-    vlrGet(`${vlrgg_url}/player/${id}`, theme),
+    vlrGet(playerUrl, theme),
     vlrGet(`${vlrgg_url}/player/matches/${id}/?group=completed`, theme),
   ]);
   const $ = cheerio.load(playerRes.data);
@@ -273,13 +345,15 @@ async function getPlayerById(id, theme) {
       pastTeams.push(team);
     });
 
-  // Combine player, team, and social information into a single object
+  // Combine player, team, agents, and social information into a single object
   const playerData = {
     info: player,
     team,
     results,
     pastTeams,
     socials,
+    timespan: timespan || "60d",
+    agents: parsePlayerAgents($),
   };
 
   return playerData;
@@ -288,4 +362,5 @@ async function getPlayerById(id, theme) {
 module.exports = {
   getPlayers,
   getPlayerById,
+  PLAYER_TIMESPANS,
 };

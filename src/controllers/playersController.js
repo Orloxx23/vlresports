@@ -59,8 +59,23 @@ const getPlayers = async (req, res) => {
 const getPlayerById = async (req, res) => {
   const { id } = req.params;
   const theme = normalizeTheme(req.query.theme);
+
+  const timespan = req.query.timespan || null;
+  if (timespan && !playersService.PLAYER_TIMESPANS.includes(timespan)) {
+    res.status(400).json({
+      status: "error",
+      message: {
+        error: 400,
+        message: `Invalid timespan. Valid values: ${playersService.PLAYER_TIMESPANS.join(
+          ", "
+        )}`,
+      },
+    });
+    return;
+  }
+
   try {
-    const player = await playersService.getPlayerById(id, theme);
+    const player = await playersService.getPlayerById(id, theme, timespan);
     res.json({
       status: "OK",
       data: player,
