@@ -15,7 +15,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000",
+      "url": "http://vlr.orlandomm.net",
       "description": "Production server"
     }
   ],
@@ -334,6 +334,212 @@
         }
       }
     },
+    "/api/v1/events/{id}": {
+      "get": {
+        "summary": "Get event by ID",
+        "description": "Retrieve full details of an event: header info (dates, prize pool, location), stages, participating teams with rosters, prize distribution and the bracket with its matches. The bracket and teams belong to one stage at a time: by default the stage vlr.gg marks as current (see `stages[].active`), or the one selected with the `stage` parameter.",
+        "tags": ["Events"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Event ID (numeric, from the vlr.gg event URL)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stage",
+            "in": "query",
+            "description": "Stage slug to select which stage's bracket and teams to return (e.g. `playoffs`, `play-ins`, `group-stage`). Valid slugs are listed in the response's `stages[].slug`. Requesting an unknown stage returns 400 with the valid options.",
+            "schema": {
+              "type": "string",
+              "example": "playoffs"
+            }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EventDetail"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid event id (must be numeric)"
+          },
+          "404": {
+            "description": "Event not found"
+          }
+        }
+      }
+    },
+    "/api/v1/events/{id}/matches": {
+      "get": {
+        "summary": "Get all matches of an event",
+        "description": "Retrieve every match of an event, optionally filtered by stage and/or status. Match ids are usable with /api/v1/matches/{id}.",
+        "tags": ["Events"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Event ID",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "stage",
+            "in": "query",
+            "description": "Stage slug to filter by (e.g. `playoffs`). Valid slugs come in the response's `stages` array. Unknown stages return 400 with the valid options.",
+            "schema": { "type": "string", "example": "playoffs" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by match status",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "upcoming", "live", "completed"],
+              "default": "all"
+            }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "stage": { "type": "string" },
+                    "matchStatus": { "type": "string" },
+                    "stages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "slug": { "type": "string" }
+                        }
+                      }
+                    },
+                    "size": { "type": "integer" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/EventMatch" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid event id, stage or status" },
+          "404": { "description": "Event not found" }
+        }
+      }
+    },
+    "/api/v1/events/{id}/stats": {
+      "get": {
+        "summary": "Get player statistics of an event",
+        "description": "Retrieve the per-player statistics table of an event (rating, ACS, K/D, KAST, ADR, clutches, etc.), optionally for a single stage.",
+        "tags": ["Events"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Event ID",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "stage",
+            "in": "query",
+            "description": "Stage slug to filter by (e.g. `group-stage`). Unknown stages return 400 with the valid options.",
+            "schema": { "type": "string", "example": "group-stage" }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "stage": { "type": "string" },
+                    "size": { "type": "integer" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/EventPlayerStats" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid event id or stage" },
+          "404": { "description": "Event not found" }
+        }
+      }
+    },
+    "/api/v1/events/{id}/agents": {
+      "get": {
+        "summary": "Get agent utilization of an event",
+        "description": "Retrieve agent pick rates per map for an event, including attack/defense round win rates. Stage filtering is not supported by vlr.gg on this page, so the data always covers the whole event.",
+        "tags": ["Events"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Event ID",
+            "schema": { "type": "string" }
+          },
+          { "$ref": "#/components/parameters/ThemeParam" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "size": { "type": "integer" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/EventAgentMap" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid event id" },
+          "404": { "description": "Event not found" }
+        }
+      }
+    },
     "/api/v1/matches": {
       "get": {
         "summary": "Get upcoming matches",
@@ -575,6 +781,322 @@
           },
           "img": {
             "type": "string"
+          }
+        }
+      },
+      "EventMatch": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Match ID, usable with /api/v1/matches/{id}"
+          },
+          "url": { "type": "string" },
+          "date": { "type": "string", "nullable": true },
+          "time": { "type": "string", "nullable": true },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "description": "`upcoming`, `live` or `completed`"
+          },
+          "eta": { "type": "string", "nullable": true },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "flag": { "type": "string", "nullable": true },
+                "score": { "type": "integer", "nullable": true },
+                "winner": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      },
+      "EventPlayerStats": {
+        "type": "object",
+        "properties": {
+          "player": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "url": { "type": "string" },
+              "name": { "type": "string" },
+              "teamTag": { "type": "string", "nullable": true },
+              "flag": { "type": "string", "nullable": true }
+            }
+          },
+          "agents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "img": { "type": "string" },
+                "playRate": {
+                  "type": "number",
+                  "nullable": true,
+                  "description": "Percentage of maps played on this agent"
+                }
+              }
+            }
+          },
+          "maps": { "type": "integer", "nullable": true },
+          "rounds": { "type": "integer", "nullable": true },
+          "rating": { "type": "number", "nullable": true },
+          "acs": { "type": "number", "nullable": true },
+          "kd": { "type": "number", "nullable": true },
+          "kast": { "type": "number", "nullable": true, "description": "Percentage" },
+          "adr": { "type": "number", "nullable": true },
+          "kpr": { "type": "number", "nullable": true },
+          "apr": { "type": "number", "nullable": true },
+          "fkfd": { "type": "number", "nullable": true, "description": "First kills : first deaths ratio" },
+          "fkpr": { "type": "number", "nullable": true },
+          "fdpr": { "type": "number", "nullable": true },
+          "hs": { "type": "number", "nullable": true, "description": "Headshot percentage" },
+          "clutchSuccess": { "type": "number", "nullable": true, "description": "Percentage" },
+          "clutches": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "won": { "type": "integer" },
+              "played": { "type": "integer" }
+            }
+          },
+          "maxKillsInMap": { "type": "integer", "nullable": true },
+          "kills": { "type": "integer", "nullable": true },
+          "deaths": { "type": "integer", "nullable": true },
+          "assists": { "type": "integer", "nullable": true },
+          "firstKills": { "type": "integer", "nullable": true },
+          "firstDeaths": { "type": "integer", "nullable": true }
+        }
+      },
+      "EventAgentMap": {
+        "type": "object",
+        "properties": {
+          "map": {
+            "type": "string",
+            "description": "Map name, or `All` for the aggregate row"
+          },
+          "played": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Times the map was played"
+          },
+          "atkWinRate": { "type": "number", "nullable": true, "description": "Percentage" },
+          "defWinRate": { "type": "number", "nullable": true, "description": "Percentage" },
+          "agents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "img": { "type": "string" },
+                "pickRate": { "type": "number", "nullable": true, "description": "Percentage" }
+              }
+            }
+          }
+        }
+      },
+      "EventDetail": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "url": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "img": { "type": "string" },
+          "circuit": {
+            "type": "object",
+            "nullable": true,
+            "description": "Parent circuit the event belongs to (e.g. Valorant Champions Tour)",
+            "properties": {
+              "name": { "type": "string" },
+              "url": { "type": "string" }
+            }
+          },
+          "dates": { "type": "string", "nullable": true },
+          "prizepool": { "type": "string", "nullable": true },
+          "location": { "type": "string", "nullable": true },
+          "stages": {
+            "type": "array",
+            "description": "Event stages/phases (e.g. Group Stage, Play-Ins, Playoffs)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "slug": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Slug usable as the `stage` query parameter"
+                },
+                "dates": { "type": "string", "nullable": true },
+                "active": {
+                  "type": "boolean",
+                  "description": "Whether this is the stage the response's bracket and teams belong to"
+                },
+                "url": { "type": "string" }
+              }
+            }
+          },
+          "teams": {
+            "type": "array",
+            "description": "Participating teams with their rosters",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "url": { "type": "string" },
+                "name": { "type": "string" },
+                "logo": { "type": "string" },
+                "seed": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Seeding or qualification note (e.g. group and position)"
+                },
+                "roster": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "url": { "type": "string" },
+                      "name": { "type": "string" },
+                      "flag": { "type": "string", "nullable": true }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "prizes": {
+            "type": "array",
+            "description": "Prize distribution by placement",
+            "items": {
+              "type": "object",
+              "properties": {
+                "place": { "type": "string" },
+                "prize": { "type": "string", "nullable": true },
+                "team": {
+                  "type": "object",
+                  "nullable": true,
+                  "properties": {
+                    "id": { "type": "string" },
+                    "url": { "type": "string" },
+                    "name": { "type": "string" },
+                    "country": { "type": "string", "nullable": true },
+                    "logo": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "groups": {
+            "type": "array",
+            "description": "Group standings, for group stages. Empty for bracket-only stages (e.g. playoffs)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Group name, e.g. `Group Alpha`"
+                },
+                "standings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "position": { "type": "integer" },
+                      "team": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string", "nullable": true },
+                          "url": { "type": "string" },
+                          "name": { "type": "string" },
+                          "country": { "type": "string", "nullable": true },
+                          "logo": { "type": "string" }
+                        }
+                      },
+                      "record": {
+                        "type": "object",
+                        "nullable": true,
+                        "description": "Series won/lost",
+                        "properties": {
+                          "wins": { "type": "integer" },
+                          "losses": { "type": "integer" }
+                        }
+                      },
+                      "maps": {
+                        "type": "object",
+                        "nullable": true,
+                        "properties": {
+                          "won": { "type": "integer" },
+                          "lost": { "type": "integer" }
+                        }
+                      },
+                      "rounds": {
+                        "type": "object",
+                        "nullable": true,
+                        "properties": {
+                          "won": { "type": "integer" },
+                          "lost": { "type": "integer" }
+                        }
+                      },
+                      "roundsDiff": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "Round differential (e.g. +30)"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "bracket": {
+            "type": "array",
+            "description": "Bracket columns (rounds) with their matches, for the active stage. Empty for stages without a bracket (e.g. group stages)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "round": { "type": "string", "nullable": true },
+                "matches": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Match ID, usable with /api/v1/matches/{id}"
+                      },
+                      "url": { "type": "string", "nullable": true },
+                      "teams": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string", "nullable": true },
+                            "name": { "type": "string" },
+                            "logo": { "type": "string" },
+                            "score": { "type": "integer", "nullable": true },
+                            "winner": { "type": "boolean" }
+                          }
+                        }
+                      },
+                      "timestamp": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "Unix timestamp (seconds, UTC) of the match"
+                      },
+                      "utcDate": { "type": "string", "nullable": true }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },

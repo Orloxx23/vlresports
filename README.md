@@ -100,6 +100,10 @@ The following are the main endpoints provided by the API:
 - `GET /api/v1/teams`: Retrieve information about all teams.
 - `GET /api/v1/teams/{team_id}`: Retrieve information about a specific team.
 - `GET /api/v1/events`: Retrieve information about all events.
+- `GET /api/v1/events/{event_id}`: Retrieve full details of an event (stages, participating teams with rosters, prize distribution and bracket). Use `?stage=<slug>` (e.g. `playoffs`) to pick which stage's bracket and teams to return; valid slugs come in `stages[].slug`. Group stages return `groups` (standings per group) instead of a bracket.
+- `GET /api/v1/events/{event_id}/matches`: Retrieve all matches of an event. Filter with `?stage=<slug>` and/or `?status=upcoming|live|completed`.
+- `GET /api/v1/events/{event_id}/stats`: Retrieve the per-player statistics table of an event (rating, ACS, K/D, clutches, etc.). Supports `?stage=<slug>`.
+- `GET /api/v1/events/{event_id}/agents`: Retrieve agent pick rates per map for an event, with attack/defense win rates.
 - `GET /api/v1/matches`: Retrieve information about upcoming matches or matches being played.
 - `GET /api/v1/matches/{match_id}`: Retrieve full details of a match (teams, score, picks/bans, per-map results and player stats).
   - Rounds timeline per map: winner, side and win method (`elim`, `boom`, `defuse`, `time`) with its icon URL.
