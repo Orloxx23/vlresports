@@ -42,6 +42,19 @@ const TTL_RULES = [
   [/^\/rankings\//, 30 * 60 * 1000],
 ];
 
+// Markup no caller reads, cut from a page before it is cached or returned, by
+// vlr.gg path. Regional ranking pages embed every team's full match history in
+// hidden "rank-item-matches" blocks right after its row: /rankings/europe is
+// ~15 MB of HTML for ~340 teams. A cheerio DOM for that needs more than the
+// whole 256 MB heap and kills the process, and kept whole, two such pages fill
+// the cache. Each block is cut up to the next team row, or the end of the page.
+const STRIP_RULES = [
+  [
+    /^\/rankings\//,
+    /<div class="rank-item-matches[\s\S]*?(?=<div class="rank-item |$)/g,
+  ],
+];
+
 // After this many upstream failures in a row vlr.gg is treated as down:
 // expired pages are served from cache right away (refreshed in the
 // background) and /health reports degraded.
@@ -138,6 +151,15 @@ function ttlFor(url) {
   return rule ? rule[1] : DEFAULT_TTL_MS;
 }
 
+function stripUnused(url, data) {
+  if (typeof data !== "string") return data;
+  const { pathname } = new URL(url);
+  for (const [pattern, unused] of STRIP_RULES) {
+    if (pattern.test(pathname)) data = data.replace(unused, "");
+  }
+  return data;
+}
+
 function cacheDelete(key) {
   const entry = cache.get(key);
   if (!entry) return;
@@ -225,8 +247,9 @@ function refresh(key, url, theme) {
   const { url: finalUrl, headers } = proxify(url, buildHeaders(theme));
   const pending = enqueue(() => fetchPage(finalUrl, headers))
     .then(({ data }) => {
-      cacheSet(key, data);
-      return { data };
+      const page = stripUnused(url, data);
+      cacheSet(key, page);
+      return { data: page };
     })
     .finally(() => inflight.delete(key));
   inflight.set(key, pending);
