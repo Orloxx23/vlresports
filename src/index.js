@@ -29,8 +29,12 @@ app.set("port", process.env.PORT || 5000);
 // When deployed behind a reverse proxy, trust it so rate limiting keys off the
 // real client IP instead of the proxy's. Left off by default: enabling it
 // without a proxy would let clients spoof X-Forwarded-For to dodge the limiter.
+// Express takes a number as a hop count but parses any string as an IP/subnet
+// list, so "1" from the environment must become the number 1 (as a string it
+// means the address 0.0.0.1 and no proxy is ever trusted).
 if (process.env.TRUST_PROXY) {
-  app.set("trust proxy", process.env.TRUST_PROXY);
+  const trustProxy = process.env.TRUST_PROXY.trim();
+  app.set("trust proxy", /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
 }
 
 // Middlewares
