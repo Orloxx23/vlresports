@@ -20,7 +20,7 @@ async function getResults(page, theme) {
         const team = {};
         team.name = $(teamElement).find(".text-of").text().trim();
         team.score = $(teamElement)
-          .find(".match-item-vs-team-score.js-spoiler")
+          .find(".match-item-vs-team-score")
           .text()
           .trim();
         team.country = $(teamElement)
@@ -28,12 +28,21 @@ async function getResults(page, theme) {
           .attr("class")
           .split(" ")[1]
           .replace("mod-", "");
+        team.won = $(teamElement).hasClass("mod-winner");
         match.teams.push(team);
       });
-    const winningScore = Math.max(...match.teams.map((team) => team.score));
-    match.teams.forEach((team) => {
-      team.won = team.score == winningScore;
-    });
+    // Fall back to comparing scores if vlr.gg didn't flag a winner
+    const scores = match.teams.map((team) => Number(team.score));
+    if (
+      !match.teams.some((team) => team.won) &&
+      match.teams.every((team) => team.score !== "") &&
+      scores.every(Number.isFinite)
+    ) {
+      const winningScore = Math.max(...scores);
+      match.teams.forEach((team, i) => {
+        team.won = scores[i] === winningScore;
+      });
+    }
     match.status = $(element).find(".ml-status").text().trim();
     match.ago = $(element).find(".ml-eta").text().trim();
     match.event = $(element)
