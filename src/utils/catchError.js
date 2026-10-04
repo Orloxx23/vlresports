@@ -1,14 +1,14 @@
 const Sentry = require("@sentry/node");
 
 // Axios errors carry the upstream status in error.response.status, not in
-// error.statusCode. An upstream 4xx (usually a 404 for a bad id) is the
-// client's mistake and must not be reported as a server error; upstream 5xx
-// and timeouts are gateway problems, not internal ones.
+// error.statusCode. An upstream 404 means the client asked for a bad id and
+// must not be reported as a server error. Any other upstream failure (a 403
+// from the proxy rejecting our token, a 429, a 5xx) is vlr.gg or the proxy
+// failing us: a gateway problem that has to reach GlitchTip.
 const resolveStatusCode = (error) => {
   if (error.statusCode) return error.statusCode;
   if (error.response && error.response.status) {
-    const upstream = error.response.status;
-    return upstream >= 500 ? 502 : upstream;
+    return error.response.status === 404 ? 404 : 502;
   }
   if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") return 504;
   return 500;
