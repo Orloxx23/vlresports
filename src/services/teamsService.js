@@ -2,6 +2,14 @@ const cheerio = require("cheerio");
 const { vlrgg_url } = require("../constants");
 const { vlrGet } = require("../utils/vlrSession");
 
+// Regional ranking pages embed every team's full match history in hidden
+// "rank-item-matches" blocks right after its row: /rankings/europe is ~15 MB
+// of HTML for ~340 teams. Building a cheerio DOM for that needs more than the
+// whole 256 MB heap and kills the process, and none of it is read here, so
+// each block is cut (up to the next team row, or the end of the page) first.
+const RANKING_MATCH_HISTORY =
+  /<div class="rank-item-matches[\s\S]*?(?=<div class="rank-item |$)/g;
+
 /**
  * Fetches teams' information from the given region with pagination.
  * @param {object} pagination - Pagination configuration.
@@ -19,7 +27,7 @@ async function getTeams(pagination, region, theme) {
 
   // Send a request to get the HTML content of the rankings page for the specified region
   const { data } = await vlrGet(`${vlrgg_url}/rankings/${region}`, theme);
-  const $ = cheerio.load(data);
+  const $ = cheerio.load(data.replace(RANKING_MATCH_HISTORY, ""));
 
   const teams = [];
 
