@@ -109,6 +109,7 @@ The following are the main endpoints provided by the API:
   - Rounds timeline per map: winner, side and win method (`elim`, `boom`, `defuse`, `time`) with its icon URL.
   - Optional query param `?tabs=performance,economy` (or `?tabs=all`) to include the vlr.gg Performance tab (multikills, clutches, duel matrices) and Economy tab (buy types, banks, round-by-round economy), both aggregated and per map. Each tab adds one extra request to vlr.gg, so only ask for what you need.
 - `GET /api/v1/results`: Retrieve information about past match results.
+- `GET /health`: Service status for uptime monitors. Returns `503` when the last requests to vlr.gg keep failing, along with queue and cache stats. Not rate limited and never calls vlr.gg itself.
 
 ## 🤝 Contributing
 

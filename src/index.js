@@ -19,7 +19,7 @@ let cors = require("cors");
 const openApiSpec = require("./openapi.json");
 const { startTeamsIndexRefresher } = require("./utils/teamLogos");
 const { startEventLogosRefresher } = require("./utils/eventLogos");
-const { startSessionRefresher } = require("./utils/vlrSession");
+const { startSessionRefresher, getScraperHealth } = require("./utils/vlrSession");
 
 const app = express();
 
@@ -72,6 +72,18 @@ const apiLimiter = rateLimit({
       message: "Too many requests",
     },
   },
+});
+
+// Point an uptime monitor here. It never calls vlr.gg itself: it reports how
+// the last real scraper requests went, so it answers 503 when vlr.gg or the
+// proxy keeps failing even though the process itself is up.
+app.get("/health", (req, res) => {
+  const scraper = getScraperHealth();
+  res.status(scraper.healthy ? 200 : 503).json({
+    status: scraper.healthy ? "ok" : "degraded",
+    uptime: Math.round(process.uptime()),
+    scraper,
+  });
 });
 
 // Routes
