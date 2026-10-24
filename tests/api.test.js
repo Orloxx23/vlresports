@@ -50,6 +50,15 @@ describe('vlresports API Tests', () => {
     }
   });
 
+  describe('Health', () => {
+    test('GET /health should return status and the package.json version', async () => {
+      const response = await axios.get(`${BASE_URL}/health`, { validateStatus: () => true });
+      expect([200, 503]).toContain(response.status);
+      expect(response.data.version).toBe(require('../package.json').version);
+      expect(response.data.status).toBeDefined();
+    });
+  });
+
   describe('Players Endpoints', () => {
     test('GET /api/v1/players should return a response', async () => {
       const response = await expectReachable(`${BASE_URL}${API_VERSION}/players`);
