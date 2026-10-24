@@ -17,6 +17,7 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 let cors = require("cors");
 const openApiSpec = require("./openapi.json");
+const { version } = require("../package.json");
 const { startTeamsIndexRefresher } = require("./utils/teamLogos");
 const { startEventLogosRefresher } = require("./utils/eventLogos");
 const { startSessionRefresher, getScraperHealth } = require("./utils/vlrSession");
@@ -85,6 +86,7 @@ app.get("/health", (req, res) => {
   const scraper = getScraperHealth();
   res.status(scraper.healthy ? 200 : 503).json({
     status: scraper.healthy ? "ok" : "degraded",
+    version,
     uptime: Math.round(process.uptime()),
     scraper,
   });
